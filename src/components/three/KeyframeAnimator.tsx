@@ -8,16 +8,20 @@ const KeyframeAnimator = () => {
   const assets = useEditorStore(state => state.assets);
   const currentTime = useEditorStore(state => state.currentTime);
   const cameraKeyframes = useEditorStore(state => state.cameraKeyframes);
+  const playing = useEditorStore(state => state.playing);
   const { camera } = useThree();
   
   // Use ref to track last update time to prevent too frequent updates
   const lastUpdateTime = useRef(0);
+  const lastAssetStates = useRef(new Map());
   
+  // Handle camera animation
   useEffect(() => {
     if (cameraKeyframes.length < 2) return;
     
     let prevKeyframe = cameraKeyframes[0];
     let nextKeyframe = cameraKeyframes[0];
+    let foundKeyframes = false;
     
     for (let i = 0; i < cameraKeyframes.length; i++) {
       if (cameraKeyframes[i].time <= currentTime) {
@@ -25,11 +29,14 @@ const KeyframeAnimator = () => {
       }
       if (cameraKeyframes[i].time >= currentTime && (i === 0 || cameraKeyframes[i-1].time <= currentTime)) {
         nextKeyframe = cameraKeyframes[i];
+        if (prevKeyframe !== nextKeyframe) {
+          foundKeyframes = true;
+        }
         break;
       }
     }
     
-    if (prevKeyframe === nextKeyframe) return;
+    if (!foundKeyframes) return;
     
     const t = (currentTime - prevKeyframe.time) / (nextKeyframe.time - prevKeyframe.time);
     
@@ -41,12 +48,15 @@ const KeyframeAnimator = () => {
     camera.rotation.y = THREE.MathUtils.lerp(prevKeyframe.rotation.y, nextKeyframe.rotation.y, t);
     camera.rotation.z = THREE.MathUtils.lerp(prevKeyframe.rotation.z, nextKeyframe.rotation.z, t);
     
-  }, [currentTime, cameraKeyframes, camera]);
+  }, [currentTime, cameraKeyframes, camera, playing]);
   
+  // Asset animation using useFrame for better performance
   useFrame(() => {
-    // Throttle updates to max 24 frames per second
+    if (!playing) return;
+    
+    // Throttle updates to max 30 frames per second
     const now = performance.now();
-    if (now - lastUpdateTime.current < 41.67) { // 1000ms / 24fps ≈ 41.67ms
+    if (now - lastUpdateTime.current < 33.33) { // 1000ms / 30fps ≈ 33.33ms
       return;
     }
     lastUpdateTime.current = now;
@@ -93,6 +103,14 @@ const KeyframeAnimator = () => {
         z: THREE.MathUtils.lerp(prevKeyframe.scale.z, nextKeyframe.scale.z, t)
       };
       
+      // Store the current state in the ref
+      lastAssetStates.current.set(asset.id, {
+        position: interpolatedPosition,
+        rotation: interpolatedRotation,
+        scale: interpolatedScale
+      });
+      
+      // Update the asset in the store
       useEditorStore.getState().updateAsset(asset.id, {
         position: interpolatedPosition,
         rotation: interpolatedRotation,

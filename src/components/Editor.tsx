@@ -1,4 +1,3 @@
-
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import { Save, Lock, Flower, Flower2, ArrowRight, Layers, LogOut } from "lucide-react";
@@ -13,9 +12,10 @@ import ChangePasswordModal from "@/components/ChangePasswordModal";
 import CanvasOverlay from "@/components/CanvasOverlay";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const Editor = () => {
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const navigate = useNavigate();
   const assets = useEditorStore(state => state.assets);
   const cameraKeyframes = useEditorStore(state => state.cameraKeyframes);
@@ -29,22 +29,38 @@ const Editor = () => {
       assets: assets.map(asset => ({
         id: asset.id,
         url: asset.url,
-        keyframes: asset.keyframes
+        keyframes: asset.keyframes,
+        position: asset.position,
+        rotation: asset.rotation,
+        scale: asset.scale
       })),
       cameraKeyframes
     };
     
-    // For demo purposes, we'll just log the data
-    console.log("Scene saved:", sceneData);
-    
-    // In a real app, you would send this data to a server
-    // or save it to localStorage
-    localStorage.setItem('saved-scene', JSON.stringify(sceneData));
-    
-    toast({
-      title: "Scene Saved",
-      description: "Your scene has been saved successfully!"
-    });
+    // Save it to localStorage
+    try {
+      localStorage.setItem('saved-scene', JSON.stringify(sceneData));
+      
+      toast.success("Scene Saved Successfully!", {
+        description: "Your animated scene will now display on the landing page",
+        duration: 5000,
+      });
+      
+      uiToast({
+        title: "Scene Saved",
+        description: "Your scene has been saved successfully!"
+      });
+      
+      // Ask if user wants to view the landing page
+      setTimeout(() => {
+        if (confirm("Would you like to view the landing page with your animation?")) {
+          navigate('/landing');
+        }
+      }, 1000);
+    } catch (error) {
+      console.error("Error saving scene:", error);
+      toast.error("Failed to save scene");
+    }
   };
 
   const handleChangePassword = () => {
@@ -91,7 +107,6 @@ const Editor = () => {
       
       <div className="flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="h-full">
-          {/* Left Sidebar */}
           <ResizablePanel defaultSize={20} minSize={15}>
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel defaultSize={50}>
@@ -106,15 +121,12 @@ const Editor = () => {
           
           <ResizableHandle withHandle />
           
-          {/* Main Content */}
           <ResizablePanel defaultSize={60}>
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel defaultSize={70}>
                 <div className="relative h-full">
-                  {/* Landing Page UI Backdrop */}
                   <div className="absolute inset-0 z-0 overflow-hidden">
                     <div className="min-h-screen bg-gradient-to-b from-green-500 to-green-600">
-                      {/* Simplified version of landing page UI */}
                       <header className="py-6 px-8 flex justify-between items-center">
                         <div className="flex items-center gap-2">
                           <Flower2 className="h-10 w-10 text-yellow-200" />
@@ -132,7 +144,6 @@ const Editor = () => {
                           </p>
                         </div>
 
-                        {/* Simplified flower decorations */}
                         <div className="absolute top-40 right-20 transform rotate-12">
                           <img src="/public/lovable-uploads/a757fc8e-1b0d-49b9-9c80-8e1a36b7abc6.png" 
                                alt="Flower" 
@@ -146,7 +157,6 @@ const Editor = () => {
                     </div>
                   </div>
                   
-                  {/* 3D Scene or Upload Prompt */}
                   <div className="absolute inset-0 z-10">
                     {showCanvas && (
                       assets.length === 0 ? (
@@ -169,25 +179,24 @@ const Editor = () => {
           
           <ResizableHandle withHandle />
           
-          {/* Right Sidebar */}
           <ResizablePanel defaultSize={20}>
             <div className="h-full border rounded-md p-4">
               <h3 className="font-semibold mb-4">Help & Tips</h3>
               <div className="space-y-3 text-sm">
                 <p>• Click "Show Canvas" to display the 3D canvas</p>
-                <p>• Drag the corner handles to resize the canvas</p>
                 <p>• Drag & drop .glb files onto the canvas</p>
-                <p>• Use the transform tools to position, rotate, and scale your assets</p>
+                <p>• Use the transform tools to position objects</p>
+                <p>• Click "Record Position" to add a keyframe</p>
+                <p>• Click "Record Camera" to store camera position</p>
                 <p>• Add keyframes at different points in the timeline</p>
-                <p>• Play the animation to preview your work</p>
-                <p>• Click "Save & Implement" when you're satisfied with your scene</p>
+                <p>• Click Play to preview the animation</p>
+                <p>• Click "Save & Implement" to display on landing page</p>
               </div>
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
       
-      {/* Password Change Modal */}
       <ChangePasswordModal />
     </div>
   );

@@ -124,13 +124,13 @@ const Model = memo(({
       
       {selected && modelRef.current && (
         <TransformControls
-          object={modelRef}
+          object={modelRef.current}
           mode={transformMode}
           size={0.7}
           translationSnap={0.25}
           rotationSnap={Math.PI / 8}
           scaleSnap={0.25}
-          enabled={true}
+          enabled={!canvasLocked}
           showX={true}
           showY={true}
           showZ={true}

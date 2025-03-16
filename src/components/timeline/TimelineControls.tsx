@@ -1,6 +1,7 @@
 
-import { Play, Pause, Key, RotateCcw } from "lucide-react";
+import { Play, Pause, Key, RotateCcw, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface TimelineControlsProps {
   playing: boolean;
@@ -32,9 +33,23 @@ const TimelineControls = ({
         Record Position
       </Button>
       <Button
+        variant="outline"
+        size="sm"
+        onClick={handleAddCameraKeyframe}
+        title="Record current camera position and rotation"
+      >
+        <Camera className="h-4 w-4 mr-1" />
+        Record Camera
+      </Button>
+      <Button
         variant={playing ? "default" : "outline"}
         size="sm"
-        onClick={() => setPlaying(!playing)}
+        onClick={() => {
+          setPlaying(!playing);
+          if (!playing) {
+            toast.info("Playing animation...");
+          }
+        }}
       >
         {playing ? (
           <Pause className="h-4 w-4" />
