@@ -20,7 +20,7 @@ const Editor = () => {
   const assets = useEditorStore(state => state.assets);
   const cameraKeyframes = useEditorStore(state => state.cameraKeyframes);
   const setPasswordDialogOpen = useEditorStore(state => state.setPasswordDialogOpen);
-  const [showCanvas, setShowCanvas] = useState(false);
+  const [showCanvas, setShowCanvas] = useState(true); // Set to true by default
   
   const handleSaveScene = () => {
     // Prepare the scene data

@@ -139,6 +139,7 @@ const Model = memo(({
           mode={transformMode}
           onObjectChange={onTransformChange}
           space="local"
+          makeDefault
         />
       )}
     </>

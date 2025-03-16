@@ -43,6 +43,7 @@ const Scene3D = () => {
   const assets = useEditorStore(state => state.assets);
   const selectedAssetId = useEditorStore(state => state.selectedAssetId);
   const transformMode = useEditorStore(state => state.transformMode);
+  const setCamera = useEditorStore(state => state.setCamera);
   const [orbitEnabled, setOrbitEnabled] = useState(true);
   
   useEffect(() => {
@@ -54,12 +55,13 @@ const Scene3D = () => {
       useEditorStore.getState().selectAsset(null);
     }
   }, []);
-  
+
   return (
     <div className="h-full w-full overflow-hidden">
       <ThreeJSErrorBoundary>
         <Canvas 
           camera={{ position: [0, 2, 5], fov: 50 }}
+          onCreated={({ camera }) => setCamera(camera)}
           frameloop="demand" // Only render when needed
           performance={{ min: 0.5 }}
           gl={{ 

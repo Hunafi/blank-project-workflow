@@ -25,7 +25,7 @@ const TransformControls = () => {
       setRotation(selectedAsset.rotation);
       setScale(selectedAsset.scale);
     }
-  }, [selectedAsset]);
+  }, [selectedAsset, selectedAsset?.position, selectedAsset?.rotation, selectedAsset?.scale]);
   
   if (!selectedAsset) {
     return (
