@@ -1,4 +1,3 @@
-
 import { useRef, useState, useEffect } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, TransformControls as DreiTransformControls, useGLTF } from "@react-three/drei";
@@ -6,7 +5,6 @@ import { useEditorStore } from "@/store/editorStore";
 import * as THREE from "three";
 import { toast } from "sonner";
 
-// Component to load and display a GLB model
 const Model = ({ 
   url, 
   position, 
@@ -31,7 +29,6 @@ const Model = ({
   const transformRef = useRef<THREE.Mesh>(null);
   const updateAsset = useEditorStore(state => state.updateAsset);
   
-  // Handle transformation changes
   useEffect(() => {
     if (!transformRef.current) return;
     
@@ -54,14 +51,11 @@ const Model = ({
     });
   };
 
-  // Only display transform controls when the asset is selected
-  // and disable OrbitControls when transforming
   const { camera } = useThree();
   const controlsRef = useRef<any>();
 
   useEffect(() => {
     if (selected && controlsRef.current) {
-      // Disable orbit controls when transforming an asset
       controlsRef.current.enabled = false;
     }
     return () => {
@@ -102,18 +96,15 @@ const Model = ({
   );
 };
 
-// Component for keyframe animation
 const KeyframeAnimator = () => {
   const assets = useEditorStore(state => state.assets);
   const currentTime = useEditorStore(state => state.currentTime);
   const cameraKeyframes = useEditorStore(state => state.cameraKeyframes);
   const { camera } = useThree();
   
-  // Animate camera based on keyframes
   useEffect(() => {
     if (cameraKeyframes.length < 2) return;
     
-    // Find the keyframes that surround the current time
     let prevKeyframe = cameraKeyframes[0];
     let nextKeyframe = cameraKeyframes[0];
     
@@ -129,27 +120,22 @@ const KeyframeAnimator = () => {
     
     if (prevKeyframe === nextKeyframe) return;
     
-    // Calculate interpolation factor
     const t = (currentTime - prevKeyframe.time) / (nextKeyframe.time - prevKeyframe.time);
     
-    // Interpolate camera position
     camera.position.x = THREE.MathUtils.lerp(prevKeyframe.position.x, nextKeyframe.position.x, t);
     camera.position.y = THREE.MathUtils.lerp(prevKeyframe.position.y, nextKeyframe.position.y, t);
     camera.position.z = THREE.MathUtils.lerp(prevKeyframe.position.z, nextKeyframe.position.z, t);
     
-    // Interpolate camera rotation
     camera.rotation.x = THREE.MathUtils.lerp(prevKeyframe.rotation.x, nextKeyframe.rotation.x, t);
     camera.rotation.y = THREE.MathUtils.lerp(prevKeyframe.rotation.y, nextKeyframe.rotation.y, t);
     camera.rotation.z = THREE.MathUtils.lerp(prevKeyframe.rotation.z, nextKeyframe.rotation.z, t);
     
   }, [currentTime, cameraKeyframes, camera]);
   
-  // Animate assets based on keyframes
   useFrame(() => {
     assets.forEach(asset => {
       if (asset.keyframes.length < 2) return;
       
-      // Find the keyframes that surround the current time
       let prevKeyframe = asset.keyframes[0];
       let nextKeyframe = asset.keyframes[0];
       let foundKeyframes = false;
@@ -169,10 +155,8 @@ const KeyframeAnimator = () => {
       
       if (!foundKeyframes) return;
       
-      // Calculate interpolation factor
       const t = (currentTime - prevKeyframe.time) / (nextKeyframe.time - prevKeyframe.time);
       
-      // Interpolate position, rotation, and scale
       const interpolatedPosition = {
         x: THREE.MathUtils.lerp(prevKeyframe.position.x, nextKeyframe.position.x, t),
         y: THREE.MathUtils.lerp(prevKeyframe.position.y, nextKeyframe.position.y, t),
@@ -191,7 +175,6 @@ const KeyframeAnimator = () => {
         z: THREE.MathUtils.lerp(prevKeyframe.scale.z, nextKeyframe.scale.z, t)
       };
       
-      // Update the asset in the store
       useEditorStore.getState().updateAsset(asset.id, {
         position: interpolatedPosition,
         rotation: interpolatedRotation,
@@ -209,13 +192,11 @@ const Scene3D = () => {
   const transformMode = useEditorStore(state => state.transformMode);
   const [orbitEnabled, setOrbitEnabled] = useState(true);
   
-  // Disable orbit controls when manipulating assets
   useEffect(() => {
     setOrbitEnabled(!selectedAssetId);
   }, [selectedAssetId]);
   
-  // Handle clicking on the background to deselect
-  const handleBackgroundClick = (e: THREE.Event) => {
+  const handleBackgroundClick = (e: THREE.Intersection) => {
     if (e.object.userData.background) {
       useEditorStore.getState().selectAsset(null);
     }
@@ -235,7 +216,6 @@ const Scene3D = () => {
           enableRotate={true}
         />
         
-        {/* Invisible background plane for deselecting objects */}
         <mesh 
           position={[0, 0, -10]} 
           rotation={[0, 0, 0]} 
