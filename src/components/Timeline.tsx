@@ -88,12 +88,12 @@ const Timeline = () => {
     if (!playing) return;
     
     const interval = setInterval(() => {
-      setCurrentTime((time) => {
-        if (time >= duration) {
+      setCurrentTime((prevTime) => {
+        if (prevTime >= duration) {
           setPlaying(false);
           return 0;
         }
-        return time + 16.67; // Roughly 60fps
+        return prevTime + 16.67; // Roughly 60fps
       });
     }, 16.67);
     
