@@ -57,18 +57,18 @@ const Scene3D = () => {
   
   return (
     <div className="h-full w-full overflow-hidden">
-      <Canvas 
-        camera={{ position: [0, 2, 5], fov: 50 }}
-        frameloop="demand" // Only render when needed
-        performance={{ min: 0.5 }}
-        gl={{ 
-          antialias: true,
-          powerPreference: "high-performance",
-          alpha: true,
-          preserveDrawingBuffer: true
-        }}
-      >
-        <ThreeJSErrorBoundary>
+      <ThreeJSErrorBoundary>
+        <Canvas 
+          camera={{ position: [0, 2, 5], fov: 50 }}
+          frameloop="demand" // Only render when needed
+          performance={{ min: 0.5 }}
+          gl={{ 
+            antialias: true,
+            powerPreference: "high-performance",
+            alpha: true,
+            preserveDrawingBuffer: true
+          }}
+        >
           <ambientLight intensity={0.5} />
           <directionalLight position={[10, 10, 5]} intensity={1} />
           <KeyframeAnimator />
@@ -98,8 +98,8 @@ const Scene3D = () => {
               />
             ))}
           </Suspense>
-        </ThreeJSErrorBoundary>
-      </Canvas>
+        </Canvas>
+      </ThreeJSErrorBoundary>
     </div>
   );
 };

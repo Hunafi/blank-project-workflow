@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
 import { useEditorStore } from "@/store/editorStore";
 import * as THREE from "three";
@@ -9,6 +9,9 @@ const KeyframeAnimator = () => {
   const currentTime = useEditorStore(state => state.currentTime);
   const cameraKeyframes = useEditorStore(state => state.cameraKeyframes);
   const { camera } = useThree();
+  
+  // Use ref to track last update time to prevent too frequent updates
+  const lastUpdateTime = useRef(0);
   
   useEffect(() => {
     if (cameraKeyframes.length < 2) return;
@@ -41,6 +44,13 @@ const KeyframeAnimator = () => {
   }, [currentTime, cameraKeyframes, camera]);
   
   useFrame(() => {
+    // Throttle updates to max 24 frames per second
+    const now = performance.now();
+    if (now - lastUpdateTime.current < 41.67) { // 1000ms / 24fps ≈ 41.67ms
+      return;
+    }
+    lastUpdateTime.current = now;
+    
     assets.forEach(asset => {
       if (asset.keyframes.length < 2) return;
       
