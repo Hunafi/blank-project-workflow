@@ -190,6 +190,7 @@ const Scene3D = () => {
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
         <KeyframeAnimator />
+        <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
         
         {assets.filter(asset => asset.visible).map(asset => (
           <Model

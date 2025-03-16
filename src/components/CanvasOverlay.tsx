@@ -21,9 +21,13 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
   const initialPosition = useRef({ x: 0, y: 0 });
   const initialSize = useRef({ width: 0, height: 0 });
   const initialPointer = useRef({ x: 0, y: 0 });
+  
+  // Get the selectedAssetId to check if we're manipulating an asset
+  const selectedAssetId = useEditorStore(state => state.selectedAssetId);
 
   const handleMouseDown = (e: React.MouseEvent, handle?: HandlePosition) => {
-    if (!isRearranging) return;
+    // Don't allow canvas manipulation if we're working with an asset
+    if (!isRearranging || selectedAssetId) return;
     
     e.stopPropagation();
     
@@ -39,7 +43,7 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
   };
 
   const handleResize = (e: MouseEvent) => {
-    if (!activeHandle || !isRearranging) return;
+    if (!activeHandle || !isRearranging || selectedAssetId) return;
 
     const dx = e.clientX - initialPointer.current.x;
     const dy = e.clientY - initialPointer.current.y;
@@ -85,7 +89,7 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
   };
 
   const handleMove = (e: MouseEvent) => {
-    if (!isDragging || !isRearranging) return;
+    if (!isDragging || !isRearranging || selectedAssetId) return;
     
     const dx = e.clientX - initialPointer.current.x;
     const dy = e.clientY - initialPointer.current.y;
@@ -117,7 +121,7 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, activeHandle, isRearranging]);
+  }, [isDragging, activeHandle, isRearranging, selectedAssetId]);
 
   const toggleCanvasVisibility = () => {
     setIsVisible(!isVisible);
@@ -151,7 +155,7 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
       {isVisible && (
         <motion.div
           ref={containerRef}
-          className={`absolute border-2 ${isRearranging ? 'border-blue-500' : 'border-green-500'} rounded-md bg-black/10 backdrop-blur-sm overflow-hidden pointer-events-auto`}
+          className={`absolute border-2 ${isRearranging ? 'border-blue-500' : 'border-green-500'} rounded-md bg-black/10 backdrop-blur-sm overflow-hidden ${selectedAssetId ? 'pointer-events-none' : 'pointer-events-auto'}`}
           style={{
             left: position.x,
             top: position.y,
@@ -162,14 +166,14 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
         >
           {/* Main draggable area */}
           <div 
-            className={`absolute inset-0 ${isRearranging ? 'cursor-move' : 'cursor-default'}`}
+            className={`absolute inset-0 ${isRearranging && !selectedAssetId ? 'cursor-move' : 'cursor-default'}`}
             onMouseDown={(e) => handleMouseDown(e)}
           >
             {children}
           </div>
 
-          {/* Resize handles - only visible when rearranging */}
-          {isRearranging && (
+          {/* Resize handles - only visible when rearranging and not manipulating an asset */}
+          {isRearranging && !selectedAssetId && (
             <>
               <div 
                 className="absolute top-0 left-0 w-5 h-5 bg-blue-500 rounded-full cursor-nwse-resize -translate-x-1/2 -translate-y-1/2"
