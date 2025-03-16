@@ -1,5 +1,5 @@
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState, useCallback, memo } from "react";
 import { useThree } from "@react-three/fiber";
 import { useGLTF, TransformControls as DreiTransformControls } from "@react-three/drei";
 import { useEditorStore } from "@/store/editorStore";
@@ -17,7 +17,8 @@ interface ModelProps {
   assetId: string;
 }
 
-const Model = ({ 
+// Using memo to prevent unnecessary re-renders
+const Model = memo(({ 
   url, 
   position, 
   rotation, 
@@ -27,11 +28,41 @@ const Model = ({
   canvasLocked,
   assetId
 }: ModelProps) => {
-  const { scene } = useGLTF(url);
-  const clone = useRef<THREE.Group>(scene.clone());
+  const { scene, errors } = useGLTF(url, true); // Added error handling
+  const cloneRef = useRef<THREE.Group | null>(null);
   const transformRef = useRef<THREE.Mesh>(null);
   const updateAsset = useEditorStore(state => state.updateAsset);
   const { camera } = useThree();
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  useEffect(() => {
+    if (scene && !cloneRef.current) {
+      try {
+        cloneRef.current = scene.clone();
+        setIsLoaded(true);
+      } catch (error) {
+        console.error("Error cloning scene:", error);
+        toast.error("Failed to load 3D model");
+      }
+    }
+    
+    return () => {
+      // Clean up when component unmounts
+      if (cloneRef.current) {
+        cloneRef.current.traverse((object) => {
+          if (object instanceof THREE.Mesh) {
+            object.geometry.dispose();
+            if (object.material instanceof THREE.Material) {
+              object.material.dispose();
+            } else if (Array.isArray(object.material)) {
+              object.material.forEach(material => material.dispose());
+            }
+          }
+        });
+        cloneRef.current = null;
+      }
+    };
+  }, [scene]);
   
   // Update mesh position, rotation, and scale when props change
   useEffect(() => {
@@ -42,8 +73,8 @@ const Model = ({
     transformRef.current.scale.set(scale.x, scale.y, scale.z);
   }, [position, rotation, scale]);
   
-  // Safe update function with debounce logic to prevent excessive updates
-  const onTransformChange = () => {
+  // Debounced update function with throttling to reduce update frequency
+  const onTransformChange = useCallback(() => {
     if (!transformRef.current || !selected) return;
     
     const pos = transformRef.current.position;
@@ -68,7 +99,21 @@ const Model = ({
         scale: { x: scl.x, y: scl.y, z: scl.z }
       });
     }
-  };
+  }, [assetId, position, rotation, scale, selected, updateAsset]);
+
+  // Use handleClick for selecting the model
+  const handleClick = useCallback((e) => {
+    if (selected) return;
+    e.stopPropagation();
+    useEditorStore.getState().selectAsset(assetId);
+    toast.success(`Selected: ${url.split('/').pop()}`, {
+      duration: 2000,
+    });
+  }, [assetId, selected, url]);
+
+  if (!isLoaded || errors) {
+    return null;
+  }
 
   return (
     <>
@@ -77,31 +122,26 @@ const Model = ({
         position={[position.x, position.y, position.z]}
         rotation={[rotation.x, rotation.y, rotation.z]}
         scale={[scale.x, scale.y, scale.z]}
-        onClick={(e) => {
-          if (selected) return;
-          e.stopPropagation();
-          useEditorStore.getState().selectAsset(assetId);
-          toast.success(`Selected: ${url.split('/').pop()}`, {
-            duration: 2000,
-          });
-        }}
+        onClick={handleClick}
       >
-        <primitive object={clone.current} />
+        {cloneRef.current && <primitive object={cloneRef.current} />}
       </mesh>
       
-      {selected && (
+      {selected && cloneRef.current && (
         <DreiTransformControls
           object={transformRef}
           mode={transformMode}
           onObjectChange={onTransformChange}
           space="local"
-          // These props help prevent excessive re-renders
           makeDefault
           enabled={true}
         />
       )}
     </>
   );
-};
+});
+
+// Set display name for React devtools
+Model.displayName = 'Model';
 
 export default Model;

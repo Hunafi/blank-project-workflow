@@ -10,20 +10,48 @@ interface ResizeHandleProps {
   disabled: boolean;
 }
 
+const getHandleStyles = (position: HandlePosition) => {
+  const styles: React.CSSProperties = {
+    position: 'absolute',
+    width: '20px',
+    height: '20px',
+    backgroundColor: 'rgba(59, 130, 246, 0.5)', // semi-transparent blue
+    borderRadius: '50%',
+    cursor: 'nwse-resize',
+    zIndex: 100,
+    transform: 'translate(-50%, -50%)',
+    border: '2px solid #2563eb'
+  };
+
+  if (position.includes('top')) {
+    styles.top = '-5px';
+  } else {
+    styles.bottom = '-5px'; 
+  }
+
+  if (position.includes('left')) {
+    styles.left = '-5px';
+  } else {
+    styles.right = '-5px';
+  }
+
+  if (position === 'top-left' || position === 'bottom-right') {
+    styles.cursor = 'nwse-resize';
+  } else {
+    styles.cursor = 'nesw-resize';
+  }
+
+  return styles;
+};
+
 const ResizeHandle = memo(({ position, onMouseDown, isVisible, disabled }: ResizeHandleProps) => {
   if (!isVisible || disabled) return null;
   
+  const styles = getHandleStyles(position);
+  
   return (
     <div 
-      className="absolute w-5 h-5 bg-blue-500 rounded-full cursor-nwse-resize"
-      style={{
-        top: position.includes('top') ? -5 : 'auto',
-        bottom: position.includes('bottom') ? -5 : 'auto',
-        left: position.includes('left') ? -5 : 'auto',
-        right: position.includes('right') ? -5 : 'auto',
-        transform: `translate(${position.includes('right') ? '50%' : '-50%'}, ${position.includes('bottom') ? '50%' : '-50%'})`,
-        zIndex: 100,
-      }}
+      style={styles}
       onMouseDown={(e) => {
         e.stopPropagation();
         onMouseDown(e, position);

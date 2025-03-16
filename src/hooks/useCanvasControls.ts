@@ -33,6 +33,18 @@ interface CanvasControlsActions {
   toggleRearrangingMode: () => void;
 }
 
+// Throttle function to limit function calls
+const throttle = (func: Function, limit: number) => {
+  let inThrottle: boolean;
+  return function(this: any, ...args: any[]) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  };
+};
+
 export const useCanvasControls = (): [CanvasControlsState, CanvasControlsActions] => {
   const [position, setPosition] = useState({ x: 100, y: 100 });
   const [size, setSize] = useState({ width: 600, height: 400 });
@@ -74,65 +86,63 @@ export const useCanvasControls = (): [CanvasControlsState, CanvasControlsActions
     initialPointer.current = { x: e.clientX, y: e.clientY };
   }, [isRearranging, selectedAssetId, position, size]);
 
-  const handleResize = useCallback((e: MouseEvent) => {
+  const handleResize = useCallback(throttle((e: MouseEvent) => {
     if (!activeHandle || !isRearranging || selectedAssetId) return;
 
     const dx = e.clientX - initialPointer.current.x;
     const dy = e.clientY - initialPointer.current.y;
 
-    // Use functional updates to prevent stale state issues
     switch (activeHandle) {
       case 'top-left':
-        setPosition(prev => ({
+        setPosition({
           x: initialPosition.current.x + dx,
           y: initialPosition.current.y + dy
-        }));
-        setSize(prev => ({
+        });
+        setSize({
           width: Math.max(200, initialSize.current.width - dx),
           height: Math.max(200, initialSize.current.height - dy)
-        }));
+        });
         break;
       case 'top-right':
-        setPosition(prev => ({
+        setPosition({
           x: initialPosition.current.x,
           y: initialPosition.current.y + dy
-        }));
-        setSize(prev => ({
+        });
+        setSize({
           width: Math.max(200, initialSize.current.width + dx),
           height: Math.max(200, initialSize.current.height - dy)
-        }));
+        });
         break;
       case 'bottom-left':
-        setPosition(prev => ({
+        setPosition({
           x: initialPosition.current.x + dx,
           y: initialPosition.current.y
-        }));
-        setSize(prev => ({
+        });
+        setSize({
           width: Math.max(200, initialSize.current.width - dx),
           height: Math.max(200, initialSize.current.height + dy)
-        }));
+        });
         break;
       case 'bottom-right':
-        setSize(prev => ({
+        setSize({
           width: Math.max(200, initialSize.current.width + dx),
           height: Math.max(200, initialSize.current.height + dy)
-        }));
+        });
         break;
     }
-  }, [activeHandle, isRearranging, selectedAssetId]);
+  }, 16), [activeHandle, isRearranging, selectedAssetId]); // 60fps throttle
 
-  const handleMove = useCallback((e: MouseEvent) => {
+  const handleMove = useCallback(throttle((e: MouseEvent) => {
     if (!isDragging || !isRearranging || selectedAssetId) return;
     
     const dx = e.clientX - initialPointer.current.x;
     const dy = e.clientY - initialPointer.current.y;
     
-    // Use functional updates to prevent stale state issues
-    setPosition(prev => ({
+    setPosition({
       x: initialPosition.current.x + dx,
       y: initialPosition.current.y + dy
-    }));
-  }, [isDragging, isRearranging, selectedAssetId]);
+    });
+  }, 16), [isDragging, isRearranging, selectedAssetId]); // 60fps throttle
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -151,7 +161,7 @@ export const useCanvasControls = (): [CanvasControlsState, CanvasControlsActions
 
     // Add mouse event listeners to window
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mouseup', handleMouseUp, { passive: true });
 
     // Cleanup
     return () => {
