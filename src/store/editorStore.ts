@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import * as THREE from 'three';
 import { passwordService } from '@/services/passwordService';
@@ -21,6 +22,7 @@ export interface Asset {
   rotation: { x: number; y: number; z: number };
   scale: { x: number; y: number; z: number };
   keyframes: Keyframe[];
+  canvasLocked: boolean; // New property to determine if asset is locked to canvas
 }
 
 // Camera keyframe type
@@ -48,6 +50,7 @@ interface EditorState {
   updateAsset: (id: string, updates: Partial<Asset>) => void;
   selectAsset: (id: string | null) => void;
   toggleAssetVisibility: (id: string) => void;
+  toggleAssetCanvasLock: (id: string) => void; // New function to toggle canvas lock
   addKeyframe: (assetId: string, keyframe: Keyframe) => void;
   removeKeyframe: (assetId: string, time: number) => void;
   updateKeyframe: (assetId: string, time: number, updates: Partial<Keyframe>) => void;
@@ -84,7 +87,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   isPasswordDialogOpen: false,
   
   addAsset: (asset) => set((state) => ({
-    assets: [...state.assets, { ...asset, id: generateId() }]
+    assets: [...state.assets, { ...asset, id: generateId(), canvasLocked: false }]
   })),
   
   removeAsset: (id) => set((state) => ({
@@ -103,6 +106,12 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   toggleAssetVisibility: (id) => set((state) => ({
     assets: state.assets.map(asset => 
       asset.id === id ? { ...asset, visible: !asset.visible } : asset
+    )
+  })),
+  
+  toggleAssetCanvasLock: (id) => set((state) => ({
+    assets: state.assets.map(asset => 
+      asset.id === id ? { ...asset, canvasLocked: !asset.canvasLocked } : asset
     )
   })),
   

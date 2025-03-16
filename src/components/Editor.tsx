@@ -1,7 +1,7 @@
 
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
-import { Save, Lock, Flower, Flower2, ArrowRight, Layers } from "lucide-react";
+import { Save, Lock, Flower, Flower2, ArrowRight, Layers, LogOut } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useEditorStore } from "@/store/editorStore";
 import Scene3D from "@/components/Scene3D";
@@ -11,11 +11,12 @@ import Timeline from "@/components/Timeline";
 import AssetDropzone from "@/components/AssetDropzone";
 import ChangePasswordModal from "@/components/ChangePasswordModal";
 import CanvasOverlay from "@/components/CanvasOverlay";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 const Editor = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const assets = useEditorStore(state => state.assets);
   const cameraKeyframes = useEditorStore(state => state.cameraKeyframes);
   const setPasswordDialogOpen = useEditorStore(state => state.setPasswordDialogOpen);
@@ -50,6 +51,10 @@ const Editor = () => {
     setPasswordDialogOpen(true);
   };
   
+  const handleExit = () => {
+    navigate('/landing');
+  };
+  
   return (
     <div className="h-screen flex flex-col">
       <div className="border-b py-2 px-4 flex justify-between items-center">
@@ -76,6 +81,10 @@ const Editor = () => {
           <Button onClick={handleSaveScene}>
             <Save className="h-4 w-4 mr-2" />
             Save & Implement
+          </Button>
+          <Button variant="destructive" onClick={handleExit}>
+            <LogOut className="h-4 w-4 mr-2" />
+            Exit Editor
           </Button>
         </div>
       </div>

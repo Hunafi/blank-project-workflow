@@ -1,10 +1,10 @@
-
-import { Move, RotateCcw, Maximize } from "lucide-react";
+import { Move, RotateCcw, Maximize, Lock, Unlock } from "lucide-react";
 import { useEditorStore } from "@/store/editorStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
+import { Switch } from "@/components/ui/switch";
 
 const TransformControls = () => {
   const selectedAssetId = useEditorStore(state => state.selectedAssetId);
@@ -12,6 +12,7 @@ const TransformControls = () => {
   const updateAsset = useEditorStore(state => state.updateAsset);
   const transformMode = useEditorStore(state => state.transformMode);
   const setTransformMode = useEditorStore(state => state.setTransformMode);
+  const toggleAssetCanvasLock = useEditorStore(state => state.toggleAssetCanvasLock);
   
   const selectedAsset = assets.find(asset => asset.id === selectedAssetId);
   
@@ -53,6 +54,12 @@ const TransformControls = () => {
     const newScale = { ...scale, [axis]: value };
     setScale(newScale);
     updateAsset(selectedAssetId, { scale: newScale });
+  };
+  
+  // Handle canvas lock toggle
+  const handleCanvasLockToggle = () => {
+    if (!selectedAssetId) return;
+    toggleAssetCanvasLock(selectedAssetId);
   };
   
   if (!selectedAsset) {
@@ -97,6 +104,23 @@ const TransformControls = () => {
         </div>
       </div>
       <div className="p-3 space-y-4 overflow-auto flex-1">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="canvas-lock"
+              checked={selectedAsset.canvasLocked}
+              onCheckedChange={handleCanvasLockToggle}
+            />
+            <Label htmlFor="canvas-lock" className="text-sm">
+              {selectedAsset.canvasLocked ? 'Locked to Canvas' : 'Free Positioning'}
+            </Label>
+          </div>
+          {selectedAsset.canvasLocked ? 
+            <Lock className="h-4 w-4 text-orange-500" /> : 
+            <Unlock className="h-4 w-4 text-green-500" />
+          }
+        </div>
+        
         <div>
           <h4 className="text-sm font-medium mb-2">Position</h4>
           <div className="grid grid-cols-3 gap-2">

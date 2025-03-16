@@ -12,14 +12,16 @@ const Model = ({
   rotation, 
   scale, 
   selected, 
-  transformMode 
+  transformMode,
+  canvasLocked
 }: { 
   url: string; 
   position: { x: number; y: number; z: number }; 
   rotation: { x: number; y: number; z: number }; 
   scale: { x: number; y: number; z: number }; 
   selected: boolean; 
-  transformMode: 'translate' | 'rotate' | 'scale'; 
+  transformMode: 'translate' | 'rotate' | 'scale';
+  canvasLocked: boolean;
 }) => {
   const { scene } = useGLTF(url);
   const clone = useRef<THREE.Group>(scene.clone());
@@ -198,6 +200,7 @@ const Scene3D = () => {
             scale={asset.scale}
             selected={asset.id === selectedAssetId}
             transformMode={transformMode}
+            canvasLocked={asset.canvasLocked}
           />
         ))}
       </Canvas>

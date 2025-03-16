@@ -1,5 +1,5 @@
 
-import { Play, Pause, Key } from "lucide-react";
+import { Play, Pause, Key, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TimelineControlsProps {
@@ -24,9 +24,10 @@ const TimelineControls = ({
         size="sm"
         onClick={handleAddKeyframe}
         disabled={!selectedAssetId}
+        title="Record current asset position, rotation and scale"
       >
         <Key className="h-4 w-4 mr-1" />
-        Add Keyframe
+        Record Position
       </Button>
       <Button
         variant={playing ? "default" : "outline"}
