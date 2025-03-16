@@ -1,6 +1,6 @@
 
 import { useRef, useEffect, useState, useCallback, memo } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
 import { useGLTF, TransformControls } from "@react-three/drei";
 import { useEditorStore } from "@/store/editorStore";
 import * as THREE from "three";
@@ -29,18 +29,27 @@ const Model = memo(({
   assetId
 }: ModelProps) => {
   const { scene } = useGLTF(url, true);
-  const cloneRef = useRef<THREE.Group | null>(null);
-  const transformRef = useRef<THREE.Mesh>(null);
-  const updateAsset = useEditorStore(state => state.updateAsset);
-  const { camera } = useThree();
+  const modelRef = useRef<THREE.Group>(null);
+  const { camera, gl } = useThree();
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const updateAsset = useEditorStore(state => state.updateAsset);
   
+  // Clone the scene when it's loaded
   useEffect(() => {
-    if (scene && !cloneRef.current) {
+    if (scene && !isLoaded) {
       try {
-        cloneRef.current = scene.clone();
-        setIsLoaded(true);
+        if (modelRef.current) {
+          // Clear any existing children
+          while (modelRef.current.children.length > 0) {
+            modelRef.current.remove(modelRef.current.children[0]);
+          }
+          
+          // Add the cloned scene as a child
+          const clonedScene = scene.clone();
+          modelRef.current.add(clonedScene);
+          setIsLoaded(true);
+        }
       } catch (error) {
         console.error("Error cloning scene:", error);
         setHasError(true);
@@ -50,8 +59,8 @@ const Model = memo(({
     
     return () => {
       // Clean up when component unmounts
-      if (cloneRef.current) {
-        cloneRef.current.traverse((object) => {
+      if (modelRef.current) {
+        modelRef.current.traverse((object) => {
           if (object instanceof THREE.Mesh) {
             object.geometry.dispose();
             if (object.material instanceof THREE.Material) {
@@ -61,47 +70,33 @@ const Model = memo(({
             }
           }
         });
-        cloneRef.current = null;
       }
     };
-  }, [scene]);
+  }, [scene, isLoaded]);
   
-  // Update mesh position, rotation, and scale when props change
+  // Update model position, rotation, and scale when props change
   useEffect(() => {
-    if (!transformRef.current) return;
+    if (!modelRef.current) return;
     
-    transformRef.current.position.set(position.x, position.y, position.z);
-    transformRef.current.rotation.set(rotation.x, rotation.y, rotation.z);
-    transformRef.current.scale.set(scale.x, scale.y, scale.z);
+    modelRef.current.position.set(position.x, position.y, position.z);
+    modelRef.current.rotation.set(rotation.x, rotation.y, rotation.z);
+    modelRef.current.scale.set(scale.x, scale.y, scale.z);
   }, [position, rotation, scale]);
   
   // Handle transform changes
-  const onTransformChange = useCallback(() => {
-    if (!transformRef.current || !selected) return;
+  const handleTransformChange = useCallback(() => {
+    if (!modelRef.current || !selected) return;
     
-    const pos = transformRef.current.position;
-    const rot = transformRef.current.rotation;
-    const scl = transformRef.current.scale;
+    const pos = modelRef.current.position;
+    const rot = modelRef.current.rotation;
+    const scl = modelRef.current.scale;
     
-    // Only update if there's an actual change
-    if (
-      pos.x !== position.x || 
-      pos.y !== position.y || 
-      pos.z !== position.z ||
-      rot.x !== rotation.x || 
-      rot.y !== rotation.y || 
-      rot.z !== rotation.z ||
-      scl.x !== scale.x || 
-      scl.y !== scale.y || 
-      scl.z !== scale.z
-    ) {
-      updateAsset(assetId, {
-        position: { x: pos.x, y: pos.y, z: pos.z },
-        rotation: { x: rot.x, y: rot.y, z: rot.z },
-        scale: { x: scl.x, y: scl.y, z: scl.z }
-      });
-    }
-  }, [assetId, position, rotation, scale, selected, updateAsset]);
+    updateAsset(assetId, {
+      position: { x: pos.x, y: pos.y, z: pos.z },
+      rotation: { x: rot.x, y: rot.y, z: rot.z },
+      scale: { x: scl.x, y: scl.y, z: scl.z }
+    });
+  }, [assetId, selected, updateAsset]);
 
   // Use handleClick for selecting the model
   const handleClick = useCallback((e) => {
@@ -117,29 +112,34 @@ const Model = memo(({
     return null;
   }
 
-  if (!isLoaded) {
-    return null;
-  }
-
   return (
     <>
-      <mesh
-        ref={transformRef}
+      <group 
+        ref={modelRef}
         position={[position.x, position.y, position.z]}
         rotation={[rotation.x, rotation.y, rotation.z]}
         scale={[scale.x, scale.y, scale.z]}
         onClick={handleClick}
-      >
-        {cloneRef.current && <primitive object={cloneRef.current} />}
-      </mesh>
+      />
       
-      {selected && transformRef.current && (
+      {selected && modelRef.current && (
         <TransformControls
-          object={transformRef}
+          object={modelRef}
           mode={transformMode}
-          onObjectChange={onTransformChange}
+          size={0.7}
+          translationSnap={0.25}
+          rotationSnap={Math.PI / 8}
+          scaleSnap={0.25}
+          enabled={true}
+          showX={true}
+          showY={true}
+          showZ={true}
+          onObjectChange={handleTransformChange}
+          onMouseUp={handleTransformChange}
           space="local"
           makeDefault
+          camera={camera}
+          domElement={gl.domElement}
         />
       )}
     </>

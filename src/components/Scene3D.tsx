@@ -44,9 +44,12 @@ const Scene3D = () => {
   const selectedAssetId = useEditorStore(state => state.selectedAssetId);
   const transformMode = useEditorStore(state => state.transformMode);
   const setCamera = useEditorStore(state => state.setCamera);
+  
+  // Disable orbit controls when an object is selected for transformation
   const [orbitEnabled, setOrbitEnabled] = useState(true);
   
   useEffect(() => {
+    // Disable orbit controls when an asset is selected
     setOrbitEnabled(!selectedAssetId);
   }, [selectedAssetId]);
   
