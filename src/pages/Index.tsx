@@ -1,6 +1,8 @@
+
 import { useEditorStore } from "@/store/editorStore";
 import PasswordProtection from "@/components/PasswordProtection";
 import Editor from "@/components/Editor";
+import { useEffect } from "react";
 
 const Index = () => {
   const isAuthenticated = useEditorStore(state => state.isAuthenticated);

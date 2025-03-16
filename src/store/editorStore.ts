@@ -1,6 +1,6 @@
-
 import { create } from 'zustand';
 import * as THREE from 'three';
+import { passwordService } from '@/services/passwordService';
 
 // Keyframe type
 export interface Keyframe {
@@ -40,6 +40,7 @@ interface EditorState {
   transformMode: 'translate' | 'rotate' | 'scale';
   isPasswordProtected: boolean;
   isAuthenticated: boolean;
+  isPasswordDialogOpen: boolean;
   
   // Actions
   addAsset: (asset: Omit<Asset, 'id'>) => void;
@@ -56,7 +57,9 @@ interface EditorState {
   setCurrentTime: (time: number) => void;
   setPlaying: (playing: boolean) => void;
   setTransformMode: (mode: 'translate' | 'rotate' | 'scale') => void;
-  authenticate: (password: string) => boolean;
+  authenticate: (password: string) => Promise<boolean>;
+  setPasswordDialogOpen: (isOpen: boolean) => void;
+  updatePassword: (newPassword: string) => Promise<boolean>;
 }
 
 // Helper to generate unique IDs
@@ -78,6 +81,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   transformMode: 'translate',
   isPasswordProtected: true,
   isAuthenticated: false,
+  isPasswordDialogOpen: false,
   
   addAsset: (asset) => set((state) => ({
     assets: [...state.assets, { ...asset, id: generateId() }]
@@ -157,15 +161,20 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   
   setTransformMode: (mode) => set({ transformMode: mode }),
   
-  authenticate: (password) => {
-    // Simple password protection for demo purposes
-    const validPassword = "editor123";
-    const isValid = password === validPassword;
+  authenticate: async (password) => {
+    const isValid = await passwordService.verifyPassword(password);
     
     if (isValid) {
       set({ isAuthenticated: true });
     }
     
     return isValid;
+  },
+  
+  setPasswordDialogOpen: (isOpen) => set({ isPasswordDialogOpen: isOpen }),
+  
+  updatePassword: async (newPassword) => {
+    const success = await passwordService.updatePassword(newPassword);
+    return success;
   }
 }));

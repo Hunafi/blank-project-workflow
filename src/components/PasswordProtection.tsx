@@ -5,23 +5,37 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useEditorStore } from "@/store/editorStore";
 import { useToast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 
 const PasswordProtection = () => {
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const authenticate = useEditorStore(state => state.authenticate);
   const { toast } = useToast();
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
-    const isValid = authenticate(password);
-    
-    if (!isValid) {
+    try {
+      const isValid = await authenticate(password);
+      
+      if (!isValid) {
+        toast({
+          title: "Authentication Failed",
+          description: "The password you entered is incorrect.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Authentication error:", error);
       toast({
-        title: "Authentication Failed",
-        description: "The password you entered is incorrect.",
+        title: "Authentication Error",
+        description: "An error occurred during authentication. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -42,12 +56,20 @@ const PasswordProtection = () => {
                 placeholder="Enter password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
               />
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full">
-              Access Editor
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Verifying...
+                </>
+              ) : (
+                "Access Editor"
+              )}
             </Button>
           </CardFooter>
         </form>

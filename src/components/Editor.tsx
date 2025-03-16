@@ -1,7 +1,7 @@
 
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
+import { Save, Lock } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useEditorStore } from "@/store/editorStore";
 import Scene3D from "@/components/Scene3D";
@@ -9,11 +9,13 @@ import AssetBrowser from "@/components/AssetBrowser";
 import TransformControls from "@/components/TransformControls";
 import Timeline from "@/components/Timeline";
 import AssetDropzone from "@/components/AssetDropzone";
+import ChangePasswordModal from "@/components/ChangePasswordModal";
 
 const Editor = () => {
   const { toast } = useToast();
   const assets = useEditorStore(state => state.assets);
   const cameraKeyframes = useEditorStore(state => state.cameraKeyframes);
+  const setPasswordDialogOpen = useEditorStore(state => state.setPasswordDialogOpen);
   
   const handleSaveScene = () => {
     // Prepare the scene data
@@ -39,15 +41,25 @@ const Editor = () => {
       description: "Your scene has been saved successfully!"
     });
   };
+
+  const handleChangePassword = () => {
+    setPasswordDialogOpen(true);
+  };
   
   return (
     <div className="h-screen flex flex-col">
       <div className="border-b py-2 px-4 flex justify-between items-center">
         <h1 className="text-xl font-semibold">3D Asset Editor</h1>
-        <Button onClick={handleSaveScene}>
-          <Save className="h-4 w-4 mr-2" />
-          Save & Implement
-        </Button>
+        <div className="flex space-x-2">
+          <Button variant="outline" onClick={handleChangePassword}>
+            <Lock className="h-4 w-4 mr-2" />
+            Change Password
+          </Button>
+          <Button onClick={handleSaveScene}>
+            <Save className="h-4 w-4 mr-2" />
+            Save & Implement
+          </Button>
+        </div>
       </div>
       
       <div className="flex-1 overflow-hidden">
@@ -96,11 +108,15 @@ const Editor = () => {
                 <p>• Add keyframes at different points in the timeline</p>
                 <p>• Play the animation to preview your work</p>
                 <p>• Click "Save & Implement" when you're satisfied with your scene</p>
+                <p>• Use "Change Password" to update your editor access password</p>
               </div>
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
+      
+      {/* Password Change Modal */}
+      <ChangePasswordModal />
     </div>
   );
 };
