@@ -43,6 +43,7 @@ interface EditorState {
   isPasswordProtected: boolean;
   isAuthenticated: boolean;
   isPasswordDialogOpen: boolean;
+  camera: THREE.Camera | null;
   
   // Actions
   addAsset: (asset: Omit<Asset, 'id'>) => void;
@@ -50,7 +51,7 @@ interface EditorState {
   updateAsset: (id: string, updates: Partial<Asset>) => void;
   selectAsset: (id: string | null) => void;
   toggleAssetVisibility: (id: string) => void;
-  toggleAssetCanvasLock: (id: string) => void; // New function to toggle canvas lock
+  toggleAssetCanvasLock: (id: string) => void;
   addKeyframe: (assetId: string, keyframe: Keyframe) => void;
   removeKeyframe: (assetId: string, time: number) => void;
   updateKeyframe: (assetId: string, time: number, updates: Partial<Keyframe>) => void;
@@ -63,6 +64,7 @@ interface EditorState {
   authenticate: (password: string) => Promise<boolean>;
   setPasswordDialogOpen: (isOpen: boolean) => void;
   updatePassword: (newPassword: string) => Promise<boolean>;
+  setCamera: (camera: THREE.Camera) => void;
 }
 
 // Helper to generate unique IDs
@@ -85,9 +87,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   isPasswordProtected: true,
   isAuthenticated: false,
   isPasswordDialogOpen: false,
+  camera: null,
   
   addAsset: (asset) => set((state) => ({
-    assets: [...state.assets, { ...asset, id: generateId(), canvasLocked: false }]
+    assets: [...state.assets, { ...asset, id: generateId() }]
   })),
   
   removeAsset: (id) => set((state) => ({
@@ -185,5 +188,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   updatePassword: async (newPassword) => {
     const success = await passwordService.updatePassword(newPassword);
     return success;
-  }
+  },
+  
+  setCamera: (camera) => set({ camera })
 }));

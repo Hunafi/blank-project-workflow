@@ -1,3 +1,4 @@
+
 import { Move, RotateCcw, Maximize, Lock, Unlock } from "lucide-react";
 import { useEditorStore } from "@/store/editorStore";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 
 const TransformControls = () => {
   const selectedAssetId = useEditorStore(state => state.selectedAssetId);
@@ -60,6 +62,15 @@ const TransformControls = () => {
   const handleCanvasLockToggle = () => {
     if (!selectedAssetId) return;
     toggleAssetCanvasLock(selectedAssetId);
+    
+    // Show toast notification
+    const asset = assets.find(a => a.id === selectedAssetId);
+    if (asset) {
+      const lockStatus = !asset.canvasLocked;
+      toast(lockStatus ? "Asset locked to canvas" : "Asset freed from canvas", {
+        duration: 2000,
+      });
+    }
   };
   
   if (!selectedAsset) {

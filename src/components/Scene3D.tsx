@@ -4,6 +4,7 @@ import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, TransformControls as DreiTransformControls, useGLTF } from "@react-three/drei";
 import { useEditorStore } from "@/store/editorStore";
 import * as THREE from "three";
+import { toast } from "sonner";
 
 // Component to load and display a GLB model
 const Model = ({ 
@@ -13,7 +14,8 @@ const Model = ({
   scale, 
   selected, 
   transformMode,
-  canvasLocked
+  canvasLocked,
+  assetId
 }: { 
   url: string; 
   position: { x: number; y: number; z: number }; 
@@ -22,15 +24,12 @@ const Model = ({
   selected: boolean; 
   transformMode: 'translate' | 'rotate' | 'scale';
   canvasLocked: boolean;
+  assetId: string;
 }) => {
   const { scene } = useGLTF(url);
   const clone = useRef<THREE.Group>(scene.clone());
   const transformRef = useRef<THREE.Mesh>(null);
   const updateAsset = useEditorStore(state => state.updateAsset);
-  const selectedAssetId = useEditorStore(state => state.selectedAssetId);
-  const assets = useEditorStore(state => state.assets);
-  
-  const asset = assets.find(a => a.id === selectedAssetId);
   
   // Handle transformation changes
   useEffect(() => {
@@ -42,18 +41,35 @@ const Model = ({
   }, [position, rotation, scale]);
   
   const onTransformChange = () => {
-    if (!transformRef.current || !selected || !asset) return;
+    if (!transformRef.current || !selected) return;
     
     const pos = transformRef.current.position;
     const rot = transformRef.current.rotation;
     const scl = transformRef.current.scale;
     
-    updateAsset(asset.id, {
+    updateAsset(assetId, {
       position: { x: pos.x, y: pos.y, z: pos.z },
       rotation: { x: rot.x, y: rot.y, z: rot.z },
       scale: { x: scl.x, y: scl.y, z: scl.z }
     });
   };
+
+  // Only display transform controls when the asset is selected
+  // and disable OrbitControls when transforming
+  const { camera } = useThree();
+  const controlsRef = useRef<any>();
+
+  useEffect(() => {
+    if (selected && controlsRef.current) {
+      // Disable orbit controls when transforming an asset
+      controlsRef.current.enabled = false;
+    }
+    return () => {
+      if (controlsRef.current) {
+        controlsRef.current.enabled = true;
+      }
+    };
+  }, [selected]);
 
   return (
     <>
@@ -62,6 +78,14 @@ const Model = ({
         position={[position.x, position.y, position.z]}
         rotation={[rotation.x, rotation.y, rotation.z]}
         scale={[scale.x, scale.y, scale.z]}
+        onClick={(e) => {
+          if (selected) return;
+          e.stopPropagation();
+          useEditorStore.getState().selectAsset(assetId);
+          toast.success(`Selected: ${url.split('/').pop()}`, {
+            duration: 2000,
+          });
+        }}
       >
         <primitive object={clone.current} />
       </mesh>
@@ -183,6 +207,19 @@ const Scene3D = () => {
   const assets = useEditorStore(state => state.assets);
   const selectedAssetId = useEditorStore(state => state.selectedAssetId);
   const transformMode = useEditorStore(state => state.transformMode);
+  const [orbitEnabled, setOrbitEnabled] = useState(true);
+  
+  // Disable orbit controls when manipulating assets
+  useEffect(() => {
+    setOrbitEnabled(!selectedAssetId);
+  }, [selectedAssetId]);
+  
+  // Handle clicking on the background to deselect
+  const handleBackgroundClick = (e: THREE.Event) => {
+    if (e.object.userData.background) {
+      useEditorStore.getState().selectAsset(null);
+    }
+  };
   
   return (
     <div className="h-full w-full overflow-hidden">
@@ -190,7 +227,28 @@ const Scene3D = () => {
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
         <KeyframeAnimator />
-        <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+        
+        <OrbitControls 
+          enabled={orbitEnabled} 
+          enablePan={true} 
+          enableZoom={true} 
+          enableRotate={true}
+        />
+        
+        {/* Invisible background plane for deselecting objects */}
+        <mesh 
+          position={[0, 0, -10]} 
+          rotation={[0, 0, 0]} 
+          scale={[100, 100, 1]}
+          onClick={(e) => {
+            e.stopPropagation();
+            useEditorStore.getState().selectAsset(null);
+          }}
+          userData={{ background: true }}
+        >
+          <planeGeometry args={[1, 1]} />
+          <meshBasicMaterial transparent opacity={0} />
+        </mesh>
         
         {assets.filter(asset => asset.visible).map(asset => (
           <Model
@@ -202,6 +260,7 @@ const Scene3D = () => {
             selected={asset.id === selectedAssetId}
             transformMode={transformMode}
             canvasLocked={asset.canvasLocked}
+            assetId={asset.id}
           />
         ))}
       </Canvas>

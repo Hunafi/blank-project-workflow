@@ -8,6 +8,7 @@ interface TimelineControlsProps {
   setPlaying: (playing: boolean) => void;
   handleAddKeyframe: () => void;
   handleAddCameraKeyframe: () => void;
+  handleReset: () => void;
 }
 
 const TimelineControls = ({
@@ -15,7 +16,8 @@ const TimelineControls = ({
   selectedAssetId,
   setPlaying,
   handleAddKeyframe,
-  handleAddCameraKeyframe
+  handleAddCameraKeyframe,
+  handleReset
 }: TimelineControlsProps) => {
   return (
     <div className="flex space-x-2">
@@ -43,7 +45,7 @@ const TimelineControls = ({
       <Button 
         variant="outline"
         size="sm"
-        onClick={() => setPlaying(false)}
+        onClick={handleReset}
         title="Reset animation"
       >
         <RotateCcw className="h-4 w-4" />

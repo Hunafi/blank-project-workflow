@@ -45,15 +45,39 @@ const Timeline = () => {
     
     addKeyframe(selectedAssetId, {
       time: currentTime,
-      position,
-      rotation,
-      scale
+      position: { ...position }, // Clone to ensure we get current values
+      rotation: { ...rotation },
+      scale: { ...scale }
     });
   };
   
   const handleAddCameraKeyframe = () => {
-    // We will simplify and focus on just asset keyframes as requested
-    toast("Camera keyframe functionality disabled");
+    const { camera } = useEditorStore.getState();
+    if (camera) {
+      addCameraKeyframe({
+        time: currentTime,
+        position: { 
+          x: camera.position.x, 
+          y: camera.position.y, 
+          z: camera.position.z 
+        },
+        rotation: { 
+          x: camera.rotation.x, 
+          y: camera.rotation.y, 
+          z: camera.rotation.z 
+        }
+      });
+      toast(`Camera keyframe added at ${(currentTime/1000).toFixed(1)}s`);
+    } else {
+      toast.error("Cannot add camera keyframe");
+    }
+  };
+  
+  // Reset button handler
+  const handleReset = () => {
+    setPlaying(false);
+    setCurrentTime(0);
+    toast("Animation reset to start");
   };
   
   useEffect(() => {
@@ -65,6 +89,7 @@ const Timeline = () => {
       if (newTime >= duration) {
         setPlaying(false);
         setCurrentTime(0);
+        toast("Animation complete");
       } else {
         setCurrentTime(newTime);
       }
@@ -83,6 +108,7 @@ const Timeline = () => {
           setPlaying={setPlaying}
           handleAddKeyframe={handleAddKeyframe}
           handleAddCameraKeyframe={handleAddCameraKeyframe}
+          handleReset={handleReset}
         />
       </div>
       

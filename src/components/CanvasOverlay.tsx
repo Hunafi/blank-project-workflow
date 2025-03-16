@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { useEditorStore } from "@/store/editorStore";
+import { toast } from "sonner";
 
 interface CanvasOverlayProps {
   children: ReactNode;
@@ -22,8 +23,18 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
   const initialSize = useRef({ width: 0, height: 0 });
   const initialPointer = useRef({ x: 0, y: 0 });
   
-  // Get the selectedAssetId to check if we're manipulating an asset
+  // Get state from store
   const selectedAssetId = useEditorStore(state => state.selectedAssetId);
+  const transformMode = useEditorStore(state => state.transformMode);
+  
+  // Only show toast once when asset is selected
+  useEffect(() => {
+    if (selectedAssetId && isRearranging) {
+      toast.info("Canvas locked while editing asset", {
+        duration: 2000,
+      });
+    }
+  }, [selectedAssetId, isRearranging]);
 
   const handleMouseDown = (e: React.MouseEvent, handle?: HandlePosition) => {
     // Don't allow canvas manipulation if we're working with an asset
@@ -128,7 +139,16 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
   };
 
   const toggleRearrangingMode = () => {
+    if (selectedAssetId) {
+      toast.warning("Please deselect asset before unlocking canvas", {
+        duration: 3000,
+      });
+      return;
+    }
     setIsRearranging(!isRearranging);
+    toast.success(isRearranging ? "Canvas locked" : "Canvas unlocked", {
+      duration: 2000,
+    });
   };
 
   return (
@@ -146,6 +166,7 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
             onClick={toggleRearrangingMode}
             variant={isRearranging ? "default" : "outline"}
             size="sm"
+            disabled={!!selectedAssetId}
           >
             {isRearranging ? "Lock Canvas" : "Unlock Canvas"}
           </Button>
