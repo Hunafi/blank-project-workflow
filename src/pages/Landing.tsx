@@ -30,25 +30,23 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-500 to-green-600 overflow-hidden">
-      <Header />
+      {/* Animated 3D scene overlaid on the entire page */}
+      {!isLoading && savedScene && (
+        <div className="fixed inset-0 pointer-events-none z-10">
+          <AnimatedScene savedScene={savedScene} autoPlay={true} />
+        </div>
+      )}
       
-      {/* Hero section with animated 3D scene */}
-      <div className="relative">
+      {/* Landing page content */}
+      <div className="relative z-20">
+        <Header />
         <Hero />
-        
-        {/* Overlay the 3D scene on top of the hero section */}
-        {!isLoading && (
-          <div className="absolute inset-0 pointer-events-none">
-            <AnimatedScene savedScene={savedScene} autoPlay={true} />
-          </div>
-        )}
+        <FactsSection />
+        <AboutSection />
+        <GallerySection />
+        <ContactSection />
+        <Footer />
       </div>
-      
-      <FactsSection />
-      <AboutSection />
-      <GallerySection />
-      <ContactSection />
-      <Footer />
     </div>
   );
 };

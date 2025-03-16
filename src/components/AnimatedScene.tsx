@@ -74,7 +74,7 @@ const AnimatedScene = ({ savedScene, autoPlay = false }: AnimatedSceneProps) => 
   }
   
   return (
-    <div className="h-full w-full pointer-events-none">
+    <div className="h-full w-full">
       <Canvas 
         camera={{ position: [0, 2, 5], fov: 50 }}
         frameloop="demand" // Only render when needed
@@ -83,6 +83,7 @@ const AnimatedScene = ({ savedScene, autoPlay = false }: AnimatedSceneProps) => 
           alpha: true,
           preserveDrawingBuffer: true
         }}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
       >
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
