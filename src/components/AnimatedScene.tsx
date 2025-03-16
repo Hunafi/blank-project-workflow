@@ -6,6 +6,7 @@ import { useEditorStore } from "@/store/editorStore";
 import AnimatedModel from "./three/AnimatedModel";
 import AnimatedCamera from "./three/AnimatedCamera";
 import SceneBackground from "./three/SceneBackground";
+import * as THREE from "three";
 
 interface AnimatedSceneProps {
   savedScene: any;
@@ -20,6 +21,8 @@ const AnimatedScene = ({ savedScene, autoPlay = false }: AnimatedSceneProps) => 
   // Initialize the scene if we have saved data
   useEffect(() => {
     if (savedScene) {
+      console.log("Initializing animated scene with data:", savedScene);
+      
       // Initialize the animation
       if (autoPlay) {
         setIsPlaying(true);
@@ -70,6 +73,7 @@ const AnimatedScene = ({ savedScene, autoPlay = false }: AnimatedSceneProps) => 
   }, [isPlaying, duration]);
   
   if (!savedScene) {
+    console.log("No scene data provided to AnimatedScene");
     return null; // Don't render anything if no scene data
   }
   
@@ -87,21 +91,21 @@ const AnimatedScene = ({ savedScene, autoPlay = false }: AnimatedSceneProps) => 
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
         
-        {/* Camera animation */}
-        {savedScene.cameraKeyframes && savedScene.cameraKeyframes.length > 0 && (
-          <AnimatedCamera 
-            keyframes={savedScene.cameraKeyframes} 
-            currentTime={animationTime}
-          />
-        )}
-        
-        {/* Assets */}
         <Suspense fallback={null}>
+          {/* Camera animation */}
+          {savedScene.cameraKeyframes && savedScene.cameraKeyframes.length > 0 && (
+            <AnimatedCamera 
+              keyframes={savedScene.cameraKeyframes} 
+              currentTime={animationTime}
+            />
+          )}
+          
+          {/* Assets */}
           {savedScene.assets && savedScene.assets.map(asset => (
             <AnimatedModel
               key={asset.id}
               url={asset.url}
-              keyframes={asset.keyframes}
+              keyframes={asset.keyframes || []}
               currentTime={animationTime}
             />
           ))}

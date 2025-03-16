@@ -56,8 +56,27 @@ const AnimatedModel = memo(({ url, keyframes, currentTime }: AnimatedModelProps)
   
   // Animate based on keyframes
   useEffect(() => {
-    if (!modelRef.current || keyframes.length < 2) return;
+    if (!modelRef.current) return;
     
+    // If no keyframes or only one, just use the initial position
+    if (!keyframes || keyframes.length === 0) {
+      // Use default position if no keyframes
+      modelRef.current.position.set(0, 0, 0);
+      modelRef.current.rotation.set(0, 0, 0);
+      modelRef.current.scale.set(1, 1, 1);
+      return;
+    }
+    
+    if (keyframes.length === 1) {
+      // Use the single keyframe values
+      const kf = keyframes[0];
+      modelRef.current.position.set(kf.position.x, kf.position.y, kf.position.z);
+      modelRef.current.rotation.set(kf.rotation.x, kf.rotation.y, kf.rotation.z);
+      modelRef.current.scale.set(kf.scale.x, kf.scale.y, kf.scale.z);
+      return;
+    }
+    
+    // Find the two keyframes to interpolate between
     let prevKeyframe = keyframes[0];
     let nextKeyframe = keyframes[0];
     let foundKeyframes = false;

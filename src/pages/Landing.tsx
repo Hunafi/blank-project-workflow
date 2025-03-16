@@ -20,10 +20,13 @@ const Landing = () => {
     if (sceneData) {
       try {
         const parsedScene = JSON.parse(sceneData);
+        console.log("Loaded scene data:", parsedScene);
         setSavedScene(parsedScene);
       } catch (error) {
         console.error("Error parsing saved scene:", error);
       }
+    } else {
+      console.log("No saved scene found in localStorage");
     }
     setIsLoading(false);
   }, []);
@@ -37,8 +40,8 @@ const Landing = () => {
         <Hero />
         
         {/* Overlay the 3D scene on top of the hero section */}
-        {!isLoading && (
-          <div className="absolute inset-0 pointer-events-none">
+        {!isLoading && savedScene && (
+          <div className="absolute inset-0 pointer-events-none z-10">
             <AnimatedScene savedScene={savedScene} autoPlay={true} />
           </div>
         )}
