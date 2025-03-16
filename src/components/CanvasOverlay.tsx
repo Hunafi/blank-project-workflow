@@ -19,6 +19,9 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
     { handleMouseDown, toggleCanvasVisibility, toggleRearrangingMode }
   ] = useCanvasControls();
 
+  // Prevent unnecessary renders
+  const hasPointerEvents = isRearranging && !selectedAssetId;
+
   return (
     <div className="absolute inset-0 pointer-events-none">
       <CanvasControls 
@@ -37,12 +40,14 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
             top: position.y,
             width: size.width,
             height: size.height,
+            touchAction: 'none',
           }}
           initial={false}
+          layout
         >
           {/* Main draggable area */}
           <div 
-            className={`absolute inset-0 ${isRearranging && !selectedAssetId ? 'cursor-move' : 'cursor-default'}`}
+            className={`absolute inset-0 ${hasPointerEvents ? 'cursor-move' : 'cursor-default'}`}
             onMouseDown={(e) => handleMouseDown(e)}
           >
             {children}

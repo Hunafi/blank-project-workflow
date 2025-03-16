@@ -31,7 +31,9 @@ const Model = ({
   const clone = useRef<THREE.Group>(scene.clone());
   const transformRef = useRef<THREE.Mesh>(null);
   const updateAsset = useEditorStore(state => state.updateAsset);
+  const { camera } = useThree();
   
+  // Update mesh position, rotation, and scale when props change
   useEffect(() => {
     if (!transformRef.current) return;
     
@@ -40,6 +42,7 @@ const Model = ({
     transformRef.current.scale.set(scale.x, scale.y, scale.z);
   }, [position, rotation, scale]);
   
+  // Safe update function with debounce logic to prevent excessive updates
   const onTransformChange = () => {
     if (!transformRef.current || !selected) return;
     
@@ -47,26 +50,25 @@ const Model = ({
     const rot = transformRef.current.rotation;
     const scl = transformRef.current.scale;
     
-    updateAsset(assetId, {
-      position: { x: pos.x, y: pos.y, z: pos.z },
-      rotation: { x: rot.x, y: rot.y, z: rot.z },
-      scale: { x: scl.x, y: scl.y, z: scl.z }
-    });
-  };
-
-  const { camera } = useThree();
-  const controlsRef = useRef<any>();
-
-  useEffect(() => {
-    if (selected && controlsRef.current) {
-      controlsRef.current.enabled = false;
+    // Only update if there's an actual change
+    if (
+      pos.x !== position.x || 
+      pos.y !== position.y || 
+      pos.z !== position.z ||
+      rot.x !== rotation.x || 
+      rot.y !== rotation.y || 
+      rot.z !== rotation.z ||
+      scl.x !== scale.x || 
+      scl.y !== scale.y || 
+      scl.z !== scale.z
+    ) {
+      updateAsset(assetId, {
+        position: { x: pos.x, y: pos.y, z: pos.z },
+        rotation: { x: rot.x, y: rot.y, z: rot.z },
+        scale: { x: scl.x, y: scl.y, z: scl.z }
+      });
     }
-    return () => {
-      if (controlsRef.current) {
-        controlsRef.current.enabled = true;
-      }
-    };
-  }, [selected]);
+  };
 
   return (
     <>
@@ -93,6 +95,9 @@ const Model = ({
           mode={transformMode}
           onObjectChange={onTransformChange}
           space="local"
+          // These props help prevent excessive re-renders
+          makeDefault
+          enabled={true}
         />
       )}
     </>

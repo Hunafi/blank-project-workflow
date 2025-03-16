@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useEditorStore } from "@/store/editorStore";
@@ -18,15 +18,19 @@ const Scene3D = () => {
     setOrbitEnabled(!selectedAssetId);
   }, [selectedAssetId]);
   
-  const handleBackgroundClick = (e: THREE.Intersection) => {
-    if (e.object.userData.background) {
+  const handleBackgroundClick = useCallback((e: THREE.Intersection) => {
+    if (e.object.userData?.background) {
       useEditorStore.getState().selectAsset(null);
     }
-  };
+  }, []);
   
   return (
     <div className="h-full w-full overflow-hidden">
-      <Canvas camera={{ position: [0, 2, 5], fov: 50 }}>
+      <Canvas 
+        camera={{ position: [0, 2, 5], fov: 50 }}
+        frameloop="demand"
+        performance={{ min: 0.5 }}
+      >
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
         <KeyframeAnimator />
@@ -36,6 +40,7 @@ const Scene3D = () => {
           enablePan={true} 
           enableZoom={true} 
           enableRotate={true}
+          makeDefault
         />
         
         <SceneBackground onClick={handleBackgroundClick} />

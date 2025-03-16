@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useEditorStore } from "@/store/editorStore";
 import { toast } from "sonner";
 
@@ -57,7 +57,7 @@ export const useCanvasControls = (): [CanvasControlsState, CanvasControlsActions
     }
   }, [selectedAssetId, isRearranging]);
 
-  const handleMouseDown = (e: React.MouseEvent, handle?: HandlePosition) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent, handle?: HandlePosition) => {
     // Don't allow canvas manipulation if we're working with an asset
     if (!isRearranging || selectedAssetId) return;
     
@@ -72,71 +72,74 @@ export const useCanvasControls = (): [CanvasControlsState, CanvasControlsActions
     initialPosition.current = { x: position.x, y: position.y };
     initialSize.current = { width: size.width, height: size.height };
     initialPointer.current = { x: e.clientX, y: e.clientY };
-  };
+  }, [isRearranging, selectedAssetId, position, size]);
 
-  const handleResize = (e: MouseEvent) => {
+  const handleResize = useCallback((e: MouseEvent) => {
     if (!activeHandle || !isRearranging || selectedAssetId) return;
 
     const dx = e.clientX - initialPointer.current.x;
     const dy = e.clientY - initialPointer.current.y;
 
+    // Use functional updates to prevent stale state issues
     switch (activeHandle) {
       case 'top-left':
-        setPosition({
+        setPosition(prev => ({
           x: initialPosition.current.x + dx,
           y: initialPosition.current.y + dy
-        });
-        setSize({
+        }));
+        setSize(prev => ({
           width: Math.max(200, initialSize.current.width - dx),
           height: Math.max(200, initialSize.current.height - dy)
-        });
+        }));
         break;
       case 'top-right':
-        setPosition({
+        setPosition(prev => ({
           x: initialPosition.current.x,
           y: initialPosition.current.y + dy
-        });
-        setSize({
+        }));
+        setSize(prev => ({
           width: Math.max(200, initialSize.current.width + dx),
           height: Math.max(200, initialSize.current.height - dy)
-        });
+        }));
         break;
       case 'bottom-left':
-        setPosition({
+        setPosition(prev => ({
           x: initialPosition.current.x + dx,
           y: initialPosition.current.y
-        });
-        setSize({
+        }));
+        setSize(prev => ({
           width: Math.max(200, initialSize.current.width - dx),
           height: Math.max(200, initialSize.current.height + dy)
-        });
+        }));
         break;
       case 'bottom-right':
-        setSize({
+        setSize(prev => ({
           width: Math.max(200, initialSize.current.width + dx),
           height: Math.max(200, initialSize.current.height + dy)
-        });
+        }));
         break;
     }
-  };
+  }, [activeHandle, isRearranging, selectedAssetId]);
 
-  const handleMove = (e: MouseEvent) => {
+  const handleMove = useCallback((e: MouseEvent) => {
     if (!isDragging || !isRearranging || selectedAssetId) return;
     
     const dx = e.clientX - initialPointer.current.x;
     const dy = e.clientY - initialPointer.current.y;
     
-    setPosition({
+    // Use functional updates to prevent stale state issues
+    setPosition(prev => ({
       x: initialPosition.current.x + dx,
       y: initialPosition.current.y + dy
-    });
-  };
+    }));
+  }, [isDragging, isRearranging, selectedAssetId]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
     setActiveHandle(null);
-  };
+  }, []);
 
+  // Cleanup function for mouse events
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
@@ -146,31 +149,33 @@ export const useCanvasControls = (): [CanvasControlsState, CanvasControlsActions
       }
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    // Add mouse event listeners to window
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('mouseup', handleMouseUp);
 
+    // Cleanup
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, activeHandle, isRearranging, selectedAssetId]);
+  }, [isDragging, activeHandle, handleMove, handleResize, handleMouseUp]);
 
-  const toggleCanvasVisibility = () => {
-    setIsVisible(!isVisible);
-  };
+  const toggleCanvasVisibility = useCallback(() => {
+    setIsVisible(prev => !prev);
+  }, []);
 
-  const toggleRearrangingMode = () => {
+  const toggleRearrangingMode = useCallback(() => {
     if (selectedAssetId) {
       toast.warning("Please deselect asset before unlocking canvas", {
         duration: 3000,
       });
       return;
     }
-    setIsRearranging(!isRearranging);
+    setIsRearranging(prev => !prev);
     toast.success(isRearranging ? "Canvas locked" : "Canvas unlocked", {
       duration: 2000,
     });
-  };
+  }, [selectedAssetId, isRearranging]);
 
   return [
     { position, size, isDragging, activeHandle, isVisible, isRearranging },
