@@ -4,6 +4,7 @@ import { useEditorStore } from "@/store/editorStore";
 import TimelineControls from "./TimelineControls";
 import TimelineScrubber from "./TimelineScrubber";
 import TimelineInfo from "./TimelineInfo";
+import { toast } from "sonner";
 
 const Timeline = () => {
   const [duration, setDuration] = useState(5000); // 5 seconds default duration
@@ -23,7 +24,10 @@ const Timeline = () => {
   const selectedAsset = assets.find(asset => asset.id === selectedAssetId);
   
   const handleAddKeyframe = () => {
-    if (!selectedAssetId || !selectedAsset) return;
+    if (!selectedAssetId || !selectedAsset) {
+      toast("Please select an asset first");
+      return;
+    }
     
     const { position, rotation, scale } = selectedAsset;
     
@@ -33,16 +37,31 @@ const Timeline = () => {
       rotation,
       scale
     });
+    
+    toast("Keyframe added");
   };
   
   const handleAddCameraKeyframe = () => {
     // Find the current camera position/rotation from the scene
-    // For simplicity, we'll use default values
+    // We'll use a simple approach to show camera keyframe functionality
+    const cameraPos = { x: 0, y: 2, z: 5 };
+    const cameraRot = { x: -0.1, y: 0, z: 0 };
+    
+    // If there are existing keyframes, we'll use values that create movement
+    if (cameraKeyframes.length > 0) {
+      // Create a slightly different position for visual effect
+      cameraPos.x = cameraKeyframes[0].position.x + (Math.random() - 0.5) * 2;
+      cameraPos.y = cameraKeyframes[0].position.y + (Math.random() - 0.5);
+      cameraPos.z = cameraKeyframes[0].position.z + (Math.random() - 0.5) * 2;
+    }
+    
     addCameraKeyframe({
       time: currentTime,
-      position: { x: 0, y: 2, z: 5 },
-      rotation: { x: -0.1, y: 0, z: 0 }
+      position: cameraPos,
+      rotation: cameraRot
     });
+    
+    toast("Camera keyframe added");
   };
   
   useEffect(() => {

@@ -178,11 +178,10 @@ const Scene3D = () => {
   const transformMode = useEditorStore(state => state.transformMode);
   
   return (
-    <div className="h-full rounded-md overflow-hidden border">
+    <div className="h-full w-full overflow-hidden">
       <Canvas camera={{ position: [0, 2, 5], fov: 50 }}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
-        <gridHelper args={[20, 20]} />
         <OrbitControls makeDefault />
         <KeyframeAnimator />
         

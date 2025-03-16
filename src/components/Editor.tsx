@@ -1,7 +1,7 @@
 
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
-import { Save, Lock, Flower, Flower2, ArrowRight } from "lucide-react";
+import { Save, Lock, Flower, Flower2, ArrowRight, Layers } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useEditorStore } from "@/store/editorStore";
 import Scene3D from "@/components/Scene3D";
@@ -10,14 +10,16 @@ import TransformControls from "@/components/TransformControls";
 import Timeline from "@/components/Timeline";
 import AssetDropzone from "@/components/AssetDropzone";
 import ChangePasswordModal from "@/components/ChangePasswordModal";
+import CanvasOverlay from "@/components/CanvasOverlay";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { useState } from "react";
 
 const Editor = () => {
   const { toast } = useToast();
   const assets = useEditorStore(state => state.assets);
   const cameraKeyframes = useEditorStore(state => state.cameraKeyframes);
   const setPasswordDialogOpen = useEditorStore(state => state.setPasswordDialogOpen);
+  const [showCanvas, setShowCanvas] = useState(false);
   
   const handleSaveScene = () => {
     // Prepare the scene data
@@ -56,6 +58,14 @@ const Editor = () => {
           <h1 className="text-xl font-semibold">WaspWorld 3D Editor</h1>
         </div>
         <div className="flex space-x-2 items-center">
+          <Button 
+            variant={showCanvas ? "default" : "outline"} 
+            size="sm" 
+            onClick={() => setShowCanvas(!showCanvas)}
+          >
+            <Layers className="h-4 w-4 mr-2" />
+            {showCanvas ? "Hide Canvas" : "Show Canvas"}
+          </Button>
           <Link to="/landing">
             <Button variant="ghost" size="sm">View Landing Page</Button>
           </Link>
@@ -93,7 +103,7 @@ const Editor = () => {
               <ResizablePanel defaultSize={70}>
                 <div className="relative h-full">
                   {/* Landing Page UI Backdrop */}
-                  <div className="absolute inset-0 z-0 overflow-hidden opacity-30">
+                  <div className="absolute inset-0 z-0 overflow-hidden">
                     <div className="min-h-screen bg-gradient-to-b from-green-500 to-green-600">
                       {/* Simplified version of landing page UI */}
                       <header className="py-6 px-8 flex justify-between items-center">
@@ -129,10 +139,14 @@ const Editor = () => {
                   
                   {/* 3D Scene or Upload Prompt */}
                   <div className="absolute inset-0 z-10">
-                    {assets.length === 0 ? (
-                      <AssetDropzone />
-                    ) : (
-                      <Scene3D />
+                    {showCanvas && (
+                      assets.length === 0 ? (
+                        <AssetDropzone />
+                      ) : (
+                        <CanvasOverlay>
+                          <Scene3D />
+                        </CanvasOverlay>
+                      )
                     )}
                   </div>
                 </div>
@@ -151,12 +165,13 @@ const Editor = () => {
             <div className="h-full border rounded-md p-4">
               <h3 className="font-semibold mb-4">Help & Tips</h3>
               <div className="space-y-3 text-sm">
+                <p>• Click "Show Canvas" to display the 3D canvas</p>
+                <p>• Drag the corner handles to resize the canvas</p>
                 <p>• Drag & drop .glb files onto the canvas</p>
                 <p>• Use the transform tools to position, rotate, and scale your assets</p>
                 <p>• Add keyframes at different points in the timeline</p>
                 <p>• Play the animation to preview your work</p>
                 <p>• Click "Save & Implement" when you're satisfied with your scene</p>
-                <p>• Use "Change Password" to update your editor access password</p>
               </div>
             </div>
           </ResizablePanel>
