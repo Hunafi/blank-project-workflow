@@ -15,13 +15,24 @@ interface AnimatedModelProps {
 }
 
 const AnimatedModel = memo(({ url, keyframes, currentTime }: AnimatedModelProps) => {
-  const { scene } = useGLTF(url, true);
   const modelRef = useRef<THREE.Group>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  
+  // Use try-catch with useGLTF to handle loading errors
+  let scene: THREE.Group | null = null;
+  
+  try {
+    const result = useGLTF(url, true);
+    scene = result.scene;
+  } catch (error) {
+    console.error(`Error loading model from ${url}:`, error);
+    setHasError(true);
+  }
   
   // Clone the scene when it's loaded
   useEffect(() => {
-    if (scene && !isLoaded && modelRef.current) {
+    if (scene && !isLoaded && modelRef.current && !hasError) {
       try {
         // Clear any existing children
         while (modelRef.current.children.length > 0) {
@@ -34,6 +45,7 @@ const AnimatedModel = memo(({ url, keyframes, currentTime }: AnimatedModelProps)
         setIsLoaded(true);
       } catch (error) {
         console.error("Error cloning scene:", error);
+        setHasError(true);
       }
     }
     
@@ -52,11 +64,11 @@ const AnimatedModel = memo(({ url, keyframes, currentTime }: AnimatedModelProps)
         });
       }
     };
-  }, [scene, isLoaded]);
+  }, [scene, isLoaded, hasError]);
   
   // Animate based on keyframes
   useEffect(() => {
-    if (!modelRef.current) return;
+    if (!modelRef.current || hasError) return;
     
     // If no keyframes or only one, just use the initial position
     if (!keyframes || keyframes.length === 0) {
@@ -168,7 +180,17 @@ const AnimatedModel = memo(({ url, keyframes, currentTime }: AnimatedModelProps)
       t
     );
     
-  }, [currentTime, keyframes]);
+  }, [currentTime, keyframes, hasError]);
+  
+  // If there was an error, render a simple fallback cube
+  if (hasError) {
+    return (
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="red" />
+      </mesh>
+    );
+  }
   
   return <group ref={modelRef} />;
 });
