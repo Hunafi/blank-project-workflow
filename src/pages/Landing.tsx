@@ -1,8 +1,9 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Flower, Flower2 } from "lucide-react";
+import { ArrowRight, Flower, Flower2, Info, Image, Phone } from "lucide-react";
 
 const Landing = () => {
   return (
@@ -14,9 +15,18 @@ const Landing = () => {
           <span className="text-2xl font-bold text-yellow-100">WaspWorld</span>
         </div>
         <nav className="hidden md:flex items-center gap-8">
-          <a href="#" className="text-yellow-100 hover:text-yellow-200 transition-colors">About</a>
-          <a href="#" className="text-yellow-100 hover:text-yellow-200 transition-colors">Gallery</a>
-          <a href="#" className="text-yellow-100 hover:text-yellow-200 transition-colors">Contact</a>
+          <a href="#about" className="text-yellow-100 hover:text-yellow-200 transition-colors flex items-center gap-1">
+            <Info className="h-4 w-4" />
+            About
+          </a>
+          <a href="#gallery" className="text-yellow-100 hover:text-yellow-200 transition-colors flex items-center gap-1">
+            <Image className="h-4 w-4" />
+            Gallery
+          </a>
+          <a href="#contact" className="text-yellow-100 hover:text-yellow-200 transition-colors flex items-center gap-1">
+            <Phone className="h-4 w-4" />
+            Contact
+          </a>
         </nav>
         <Link to="/editor">
           <Button variant="outline" className="bg-transparent border-yellow-200 text-yellow-100 hover:bg-yellow-200/10">
@@ -26,7 +36,7 @@ const Landing = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-40 px-8 md:px-16 lg:px-24 flex flex-col md:flex-row items-center gap-12">
+      <section id="hero" className="relative pt-20 pb-40 px-8 md:px-16 lg:px-24 flex flex-col md:flex-row items-center gap-12">
         {/* Left Content */}
         <div className="md:w-1/2 z-10">
           <motion.h1 
@@ -50,9 +60,11 @@ const Landing = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            <Button className="bg-yellow-400 hover:bg-yellow-500 text-green-900 font-semibold flex items-center gap-2">
-              Learn more <ArrowRight className="h-4 w-4" />
-            </Button>
+            <a href="#facts">
+              <Button className="bg-yellow-400 hover:bg-yellow-500 text-green-900 font-semibold flex items-center gap-2">
+                Learn more <ArrowRight className="h-4 w-4" />
+              </Button>
+            </a>
           </motion.div>
         </div>
 
@@ -91,7 +103,7 @@ const Landing = () => {
       </section>
       
       {/* Facts Section */}
-      <section className="px-8 md:px-16 lg:px-24 py-20 bg-green-600/50 backdrop-blur-sm">
+      <section id="facts" className="px-8 md:px-16 lg:px-24 py-20 bg-green-600/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-6xl font-bold text-yellow-200 mb-12">Fascinating Facts</h2>
           
@@ -128,6 +140,75 @@ const Landing = () => {
               <h3 className="text-2xl font-semibold text-yellow-100 mb-3">Recovery Time</h3>
               <p className="text-yellow-50">Though wasp stings hurt, symptoms normally improve after a few hours with proper care.</p>
             </motion.div>
+          </div>
+        </div>
+      </section>
+      
+      {/* About Section */}
+      <section id="about" className="px-8 md:px-16 lg:px-24 py-20 bg-green-700/30">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-6xl font-bold text-yellow-200 mb-12">About Wasps</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <p className="text-lg text-yellow-50 mb-6">
+                Wasps are insects of the order Hymenoptera, which also includes bees and ants. With over 30,000 identified species, wasps come in a variety of sizes and colors, but most feature yellow or orange and black stripes to warn potential predators.
+              </p>
+              <p className="text-lg text-yellow-50">
+                Unlike bees, wasps can sting multiple times because their stinger is not barbed and remains intact after use. Most wasp species are parasitic and non-stinging, playing vital roles in ecosystems as pollinators and natural pest controllers.
+              </p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-green-600/30 p-6 rounded-xl backdrop-blur-sm"
+            >
+              <h3 className="text-2xl font-semibold text-yellow-200 mb-4">Key Characteristics</h3>
+              <ul className="list-disc list-inside space-y-2 text-yellow-50">
+                <li>Thin waist connecting thorax and abdomen</li>
+                <li>Two pairs of wings</li>
+                <li>Smooth stinger that can be used repeatedly</li>
+                <li>Some species build nests from paper-like material</li>
+                <li>Most are predatory or parasitic</li>
+                <li>Social wasps live in colonies with a queen</li>
+              </ul>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery Section */}
+      <section id="gallery" className="px-8 md:px-16 lg:px-24 py-20 bg-green-600/40">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-6xl font-bold text-yellow-200 mb-12">Gallery</h2>
+          <p className="text-xl text-yellow-50 max-w-2xl mx-auto text-center mb-10">
+            Explore our 3D wasp models and animations created with our editor.
+          </p>
+          <div className="flex justify-center">
+            <Link to="/editor">
+              <Button size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-green-900 font-semibold">
+                Try the Editor Yourself
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+      
+      {/* Contact Section */}
+      <section id="contact" className="px-8 md:px-16 lg:px-24 py-20 bg-green-700/20">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-6xl font-bold text-yellow-200 mb-12">Contact Us</h2>
+          <div className="flex flex-col items-center">
+            <p className="text-xl text-yellow-50 max-w-2xl text-center mb-8">
+              Have questions about wasps or want to learn more? Reach out to our team!
+            </p>
+            <Button className="bg-yellow-400 hover:bg-yellow-500 text-green-900 font-semibold">
+              Get in Touch
+            </Button>
           </div>
         </div>
       </section>
