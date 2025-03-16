@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, Suspense, ErrorBoundary } from "react";
+import { useState, useEffect, useCallback, Suspense, Component } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useEditorStore } from "@/store/editorStore";
@@ -9,19 +9,35 @@ import KeyframeAnimator from "./three/KeyframeAnimator";
 import SceneBackground from "./three/SceneBackground";
 
 // Custom error boundary for Three.js components
-const ThreeJSErrorBoundary = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <ErrorBoundary
-      fallback={
+class ThreeJSErrorBoundary extends Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error("Three.js Error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
         <div className="text-red-500 p-4 bg-red-100 rounded-md">
           An error occurred in the 3D renderer. Try refreshing the page.
         </div>
-      }
-    >
-      {children}
-    </ErrorBoundary>
-  );
-};
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const Scene3D = () => {
   const assets = useEditorStore(state => state.assets);

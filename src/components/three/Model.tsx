@@ -28,12 +28,13 @@ const Model = memo(({
   canvasLocked,
   assetId
 }: ModelProps) => {
-  const { scene, errors } = useGLTF(url, true); // Added error handling
+  const { scene } = useGLTF(url, true);
   const cloneRef = useRef<THREE.Group | null>(null);
   const transformRef = useRef<THREE.Mesh>(null);
   const updateAsset = useEditorStore(state => state.updateAsset);
   const { camera } = useThree();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
   
   useEffect(() => {
     if (scene && !cloneRef.current) {
@@ -42,6 +43,7 @@ const Model = memo(({
         setIsLoaded(true);
       } catch (error) {
         console.error("Error cloning scene:", error);
+        setHasError(true);
         toast.error("Failed to load 3D model");
       }
     }
@@ -111,7 +113,11 @@ const Model = memo(({
     });
   }, [assetId, selected, url]);
 
-  if (!isLoaded || errors) {
+  if (hasError) {
+    return null;
+  }
+
+  if (!isLoaded) {
     return null;
   }
 
