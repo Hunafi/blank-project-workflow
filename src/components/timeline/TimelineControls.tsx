@@ -26,15 +26,7 @@ const TimelineControls = ({
         disabled={!selectedAssetId}
       >
         <Key className="h-4 w-4 mr-1" />
-        Add Asset Keyframe
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleAddCameraKeyframe}
-      >
-        <Key className="h-4 w-4 mr-1" />
-        Add Camera Keyframe
+        Add Keyframe
       </Button>
       <Button
         variant={playing ? "default" : "outline"}

@@ -69,6 +69,7 @@ const Model = ({
           object={transformRef}
           mode={transformMode}
           onObjectChange={onTransformChange}
+          space="local"
         />
       )}
     </>
@@ -125,6 +126,7 @@ const KeyframeAnimator = () => {
       // Find the keyframes that surround the current time
       let prevKeyframe = asset.keyframes[0];
       let nextKeyframe = asset.keyframes[0];
+      let foundKeyframes = false;
       
       for (let i = 0; i < asset.keyframes.length; i++) {
         if (asset.keyframes[i].time <= currentTime) {
@@ -132,11 +134,14 @@ const KeyframeAnimator = () => {
         }
         if (asset.keyframes[i].time >= currentTime && (i === 0 || asset.keyframes[i-1].time <= currentTime)) {
           nextKeyframe = asset.keyframes[i];
+          if (prevKeyframe !== nextKeyframe) {
+            foundKeyframes = true;
+          }
           break;
         }
       }
       
-      if (prevKeyframe === nextKeyframe) return;
+      if (!foundKeyframes) return;
       
       // Calculate interpolation factor
       const t = (currentTime - prevKeyframe.time) / (nextKeyframe.time - prevKeyframe.time);
@@ -182,7 +187,6 @@ const Scene3D = () => {
       <Canvas camera={{ position: [0, 2, 5], fov: 50 }}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
-        <OrbitControls makeDefault />
         <KeyframeAnimator />
         
         {assets.filter(asset => asset.visible).map(asset => (

@@ -31,37 +31,29 @@ const Timeline = () => {
     
     const { position, rotation, scale } = selectedAsset;
     
+    // Check if keyframe at this time already exists
+    const existingKeyframeIndex = selectedAsset.keyframes.findIndex(
+      keyframe => keyframe.time === currentTime
+    );
+    
+    if (existingKeyframeIndex >= 0) {
+      // Update existing keyframe
+      toast("Updated existing keyframe");
+    } else {
+      toast(`Keyframe added at ${(currentTime/1000).toFixed(1)}s`);
+    }
+    
     addKeyframe(selectedAssetId, {
       time: currentTime,
       position,
       rotation,
       scale
     });
-    
-    toast("Keyframe added");
   };
   
   const handleAddCameraKeyframe = () => {
-    // Find the current camera position/rotation from the scene
-    // We'll use a simple approach to show camera keyframe functionality
-    const cameraPos = { x: 0, y: 2, z: 5 };
-    const cameraRot = { x: -0.1, y: 0, z: 0 };
-    
-    // If there are existing keyframes, we'll use values that create movement
-    if (cameraKeyframes.length > 0) {
-      // Create a slightly different position for visual effect
-      cameraPos.x = cameraKeyframes[0].position.x + (Math.random() - 0.5) * 2;
-      cameraPos.y = cameraKeyframes[0].position.y + (Math.random() - 0.5);
-      cameraPos.z = cameraKeyframes[0].position.z + (Math.random() - 0.5) * 2;
-    }
-    
-    addCameraKeyframe({
-      time: currentTime,
-      position: cameraPos,
-      rotation: cameraRot
-    });
-    
-    toast("Camera keyframe added");
+    // We will simplify and focus on just asset keyframes as requested
+    toast("Camera keyframe functionality disabled");
   };
   
   useEffect(() => {

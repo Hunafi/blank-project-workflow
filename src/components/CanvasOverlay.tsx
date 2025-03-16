@@ -1,6 +1,8 @@
 
 import { useState, useRef, useEffect, ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import { Button } from "@/components/ui/button";
+import { useEditorStore } from "@/store/editorStore";
 
 interface CanvasOverlayProps {
   children: ReactNode;
@@ -13,12 +15,16 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
   const [size, setSize] = useState({ width: 600, height: 400 });
   const [isDragging, setIsDragging] = useState(false);
   const [activeHandle, setActiveHandle] = useState<HandlePosition | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isRearranging, setIsRearranging] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const initialPosition = useRef({ x: 0, y: 0 });
   const initialSize = useRef({ width: 0, height: 0 });
   const initialPointer = useRef({ x: 0, y: 0 });
 
   const handleMouseDown = (e: React.MouseEvent, handle?: HandlePosition) => {
+    if (!isRearranging) return;
+    
     e.stopPropagation();
     
     if (handle) {
@@ -33,7 +39,7 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
   };
 
   const handleResize = (e: MouseEvent) => {
-    if (!activeHandle) return;
+    if (!activeHandle || !isRearranging) return;
 
     const dx = e.clientX - initialPointer.current.x;
     const dy = e.clientY - initialPointer.current.y;
@@ -79,7 +85,7 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
   };
 
   const handleMove = (e: MouseEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || !isRearranging) return;
     
     const dx = e.clientX - initialPointer.current.x;
     const dy = e.clientY - initialPointer.current.y;
@@ -111,47 +117,80 @@ const CanvasOverlay = ({ children }: CanvasOverlayProps) => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, activeHandle]);
+  }, [isDragging, activeHandle, isRearranging]);
+
+  const toggleCanvasVisibility = () => {
+    setIsVisible(!isVisible);
+  };
+
+  const toggleRearrangingMode = () => {
+    setIsRearranging(!isRearranging);
+  };
 
   return (
     <div className="absolute inset-0 pointer-events-none">
-      <motion.div
-        ref={containerRef}
-        className="absolute border-2 border-blue-500 rounded-md bg-black/10 backdrop-blur-sm overflow-hidden pointer-events-auto"
-        style={{
-          left: position.x,
-          top: position.y,
-          width: size.width,
-          height: size.height,
-        }}
-        initial={false}
-      >
-        {/* Main draggable area */}
-        <div 
-          className="absolute inset-0 cursor-move"
-          onMouseDown={(e) => handleMouseDown(e)}
+      <div className="absolute top-4 right-4 z-50 flex gap-2 pointer-events-auto">
+        <Button 
+          onClick={toggleCanvasVisibility} 
+          variant={isVisible ? "default" : "outline"}
+          size="sm"
         >
-          {children}
-        </div>
+          {isVisible ? "Hide Canvas" : "Show Canvas"}
+        </Button>
+        {isVisible && (
+          <Button 
+            onClick={toggleRearrangingMode}
+            variant={isRearranging ? "default" : "outline"}
+            size="sm"
+          >
+            {isRearranging ? "Lock Canvas" : "Unlock Canvas"}
+          </Button>
+        )}
+      </div>
 
-        {/* Resize handles */}
-        <div 
-          className="absolute top-0 left-0 w-5 h-5 bg-blue-500 rounded-full cursor-nwse-resize -translate-x-1/2 -translate-y-1/2"
-          onMouseDown={(e) => handleMouseDown(e, 'top-left')}
-        />
-        <div 
-          className="absolute top-0 right-0 w-5 h-5 bg-blue-500 rounded-full cursor-nesw-resize translate-x-1/2 -translate-y-1/2"
-          onMouseDown={(e) => handleMouseDown(e, 'top-right')}
-        />
-        <div 
-          className="absolute bottom-0 left-0 w-5 h-5 bg-blue-500 rounded-full cursor-nesw-resize -translate-x-1/2 translate-y-1/2"
-          onMouseDown={(e) => handleMouseDown(e, 'bottom-left')}
-        />
-        <div 
-          className="absolute bottom-0 right-0 w-5 h-5 bg-blue-500 rounded-full cursor-nwse-resize translate-x-1/2 translate-y-1/2"
-          onMouseDown={(e) => handleMouseDown(e, 'bottom-right')}
-        />
-      </motion.div>
+      {isVisible && (
+        <motion.div
+          ref={containerRef}
+          className={`absolute border-2 ${isRearranging ? 'border-blue-500' : 'border-green-500'} rounded-md bg-black/10 backdrop-blur-sm overflow-hidden pointer-events-auto`}
+          style={{
+            left: position.x,
+            top: position.y,
+            width: size.width,
+            height: size.height,
+          }}
+          initial={false}
+        >
+          {/* Main draggable area */}
+          <div 
+            className={`absolute inset-0 ${isRearranging ? 'cursor-move' : 'cursor-default'}`}
+            onMouseDown={(e) => handleMouseDown(e)}
+          >
+            {children}
+          </div>
+
+          {/* Resize handles - only visible when rearranging */}
+          {isRearranging && (
+            <>
+              <div 
+                className="absolute top-0 left-0 w-5 h-5 bg-blue-500 rounded-full cursor-nwse-resize -translate-x-1/2 -translate-y-1/2"
+                onMouseDown={(e) => handleMouseDown(e, 'top-left')}
+              />
+              <div 
+                className="absolute top-0 right-0 w-5 h-5 bg-blue-500 rounded-full cursor-nesw-resize translate-x-1/2 -translate-y-1/2"
+                onMouseDown={(e) => handleMouseDown(e, 'top-right')}
+              />
+              <div 
+                className="absolute bottom-0 left-0 w-5 h-5 bg-blue-500 rounded-full cursor-nesw-resize -translate-x-1/2 translate-y-1/2"
+                onMouseDown={(e) => handleMouseDown(e, 'bottom-left')}
+              />
+              <div 
+                className="absolute bottom-0 right-0 w-5 h-5 bg-blue-500 rounded-full cursor-nwse-resize translate-x-1/2 translate-y-1/2"
+                onMouseDown={(e) => handleMouseDown(e, 'bottom-right')}
+              />
+            </>
+          )}
+        </motion.div>
+      )}
     </div>
   );
 };
