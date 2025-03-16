@@ -88,17 +88,20 @@ const Timeline = () => {
     if (!playing) return;
     
     const interval = setInterval(() => {
-      setCurrentTime((prevTime) => {
-        if (prevTime >= duration) {
-          setPlaying(false);
-          return 0;
-        }
-        return prevTime + 16.67; // Roughly 60fps
-      });
+      // Instead of passing a function to setCurrentTime, we calculate the new time here
+      // and pass the direct number value
+      const newTime = currentTime + 16.67; // Roughly 60fps
+      
+      if (newTime >= duration) {
+        setPlaying(false);
+        setCurrentTime(0);
+      } else {
+        setCurrentTime(newTime);
+      }
     }, 16.67);
     
     return () => clearInterval(interval);
-  }, [playing, duration, setCurrentTime, setPlaying]);
+  }, [playing, duration, currentTime, setCurrentTime, setPlaying]);
   
   const timePercentage = (currentTime / duration) * 100;
   
