@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -19,7 +18,7 @@ const Landing = () => {
           <a href="#" className="text-yellow-100 hover:text-yellow-200 transition-colors">Gallery</a>
           <a href="#" className="text-yellow-100 hover:text-yellow-200 transition-colors">Contact</a>
         </nav>
-        <Link to="/">
+        <Link to="/editor">
           <Button variant="outline" className="bg-transparent border-yellow-200 text-yellow-100 hover:bg-yellow-200/10">
             Enter Editor
           </Button>

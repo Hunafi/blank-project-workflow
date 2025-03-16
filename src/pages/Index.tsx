@@ -1,8 +1,6 @@
-
 import { useEditorStore } from "@/store/editorStore";
 import PasswordProtection from "@/components/PasswordProtection";
 import Editor from "@/components/Editor";
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
