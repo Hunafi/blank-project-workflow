@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Flower, Flower2, Info, Image, Phone } from "lucide-react";
+import { ArrowRight, Info, Image, Phone } from "lucide-react";
 
 const Landing = () => {
   return (
@@ -11,7 +11,6 @@ const Landing = () => {
       {/* Navigation */}
       <header className="py-6 px-8 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <Flower2 className="h-10 w-10 text-yellow-200" />
           <span className="text-2xl font-bold text-yellow-100">WaspWorld</span>
         </div>
         <nav className="hidden md:flex items-center gap-8">
@@ -36,76 +35,61 @@ const Landing = () => {
       </header>
 
       {/* Hero Section */}
-      <section id="hero" className="relative pt-20 pb-40 px-8 md:px-16 lg:px-24 flex flex-col md:flex-row items-center gap-12">
-        {/* Left Content */}
-        <div className="md:w-1/2 z-10">
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-7xl md:text-8xl font-bold text-yellow-200 leading-none mb-6"
-          >
-            Wasp
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xl text-yellow-50 max-w-lg mb-8"
-          >
-            We all know that wasps can sting repeatedly, but here are some facts about wasps you may not know
-          </motion.p>
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            <a href="#facts">
-              <Button className="bg-yellow-400 hover:bg-yellow-500 text-green-900 font-semibold flex items-center gap-2">
-                Learn more <ArrowRight className="h-4 w-4" />
-              </Button>
-            </a>
-          </motion.div>
-        </div>
+      <section id="hero" className="relative pt-20 pb-40 px-8 md:px-16 lg:px-24">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+          {/* Left Content - Text aligned left */}
+          <div className="md:w-1/2 z-10 text-left">
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-7xl md:text-8xl font-bold text-yellow-200 leading-none mb-6"
+            >
+              Wasp
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-xl text-yellow-50 max-w-lg mb-8"
+            >
+              We all know that wasps can sting repeatedly, but here are some facts about wasps you may not know
+            </motion.p>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="text-left"
+            >
+              <a href="#facts">
+                <Button className="bg-yellow-400 hover:bg-yellow-500 text-green-900 font-semibold flex items-center gap-2">
+                  Learn more <ArrowRight className="h-4 w-4" />
+                </Button>
+              </a>
+            </motion.div>
+          </div>
 
-        {/* Flower Decorations */}
-        <div className="absolute top-40 right-20 transform rotate-12">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.6 }}
-          >
-            <img src="/public/lovable-uploads/a757fc8e-1b0d-49b9-9c80-8e1a36b7abc6.png" 
-                 alt="Flower" 
-                 className="w-60 h-60 object-contain" />
-          </motion.div>
-        </div>
-        
-        <div className="absolute bottom-20 left-40 transform -rotate-6">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.8 }}
-          >
-            <Flower className="h-40 w-40 text-pink-400" />
-          </motion.div>
-        </div>
-        
-        <div className="absolute top-32 left-1/4 transform rotate-45">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 1 }}
-          >
-            <Flower2 className="h-20 w-20 text-yellow-300" />
-          </motion.div>
+          {/* Right Content - Image placeholder */}
+          <div className="md:w-1/2 z-10 flex justify-center md:justify-end">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.6 }}
+              className="bg-green-600/50 rounded-lg p-4 flex items-center justify-center"
+            >
+              <div className="w-full h-80 bg-green-700/40 rounded-lg flex items-center justify-center">
+                <Image className="h-20 w-20 text-yellow-200 opacity-50" />
+                <p className="text-yellow-100 absolute">Image coming soon</p>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
       
       {/* Facts Section */}
       <section id="facts" className="px-8 md:px-16 lg:px-24 py-20 bg-green-600/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-6xl font-bold text-yellow-200 mb-12">Fascinating Facts</h2>
+          <h2 className="text-6xl font-bold text-yellow-200 mb-12 text-left">Fascinating Facts</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <motion.div 
@@ -147,12 +131,13 @@ const Landing = () => {
       {/* About Section */}
       <section id="about" className="px-8 md:px-16 lg:px-24 py-20 bg-green-700/30">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-6xl font-bold text-yellow-200 mb-12">About Wasps</h2>
+          <h2 className="text-6xl font-bold text-yellow-200 mb-12 text-left">About Wasps</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
+              className="text-left"
             >
               <p className="text-lg text-yellow-50 mb-6">
                 Wasps are insects of the order Hymenoptera, which also includes bees and ants. With over 30,000 identified species, wasps come in a variety of sizes and colors, but most feature yellow or orange and black stripes to warn potential predators.
@@ -167,8 +152,8 @@ const Landing = () => {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="bg-green-600/30 p-6 rounded-xl backdrop-blur-sm"
             >
-              <h3 className="text-2xl font-semibold text-yellow-200 mb-4">Key Characteristics</h3>
-              <ul className="list-disc list-inside space-y-2 text-yellow-50">
+              <h3 className="text-2xl font-semibold text-yellow-200 mb-4 text-left">Key Characteristics</h3>
+              <ul className="list-disc list-inside space-y-2 text-yellow-50 text-left">
                 <li>Thin waist connecting thorax and abdomen</li>
                 <li>Two pairs of wings</li>
                 <li>Smooth stinger that can be used repeatedly</li>
@@ -184,11 +169,11 @@ const Landing = () => {
       {/* Gallery Section */}
       <section id="gallery" className="px-8 md:px-16 lg:px-24 py-20 bg-green-600/40">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-6xl font-bold text-yellow-200 mb-12">Gallery</h2>
-          <p className="text-xl text-yellow-50 max-w-2xl mx-auto text-center mb-10">
+          <h2 className="text-6xl font-bold text-yellow-200 mb-12 text-left">Gallery</h2>
+          <p className="text-xl text-yellow-50 max-w-2xl text-left mb-10">
             Explore our 3D wasp models and animations created with our editor.
           </p>
-          <div className="flex justify-center">
+          <div className="flex justify-start">
             <Link to="/editor">
               <Button size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-green-900 font-semibold">
                 Try the Editor Yourself
@@ -201,9 +186,9 @@ const Landing = () => {
       {/* Contact Section */}
       <section id="contact" className="px-8 md:px-16 lg:px-24 py-20 bg-green-700/20">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-6xl font-bold text-yellow-200 mb-12">Contact Us</h2>
-          <div className="flex flex-col items-center">
-            <p className="text-xl text-yellow-50 max-w-2xl text-center mb-8">
+          <h2 className="text-6xl font-bold text-yellow-200 mb-12 text-left">Contact Us</h2>
+          <div className="flex flex-col items-start">
+            <p className="text-xl text-yellow-50 max-w-2xl text-left mb-8">
               Have questions about wasps or want to learn more? Reach out to our team!
             </p>
             <Button className="bg-yellow-400 hover:bg-yellow-500 text-green-900 font-semibold">
@@ -217,7 +202,6 @@ const Landing = () => {
       <footer className="py-8 px-8 md:px-16 lg:px-24 bg-green-700/30 text-yellow-100">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center gap-2 mb-4 md:mb-0">
-            <Flower2 className="h-8 w-8 text-yellow-200" />
             <span className="text-xl font-bold text-yellow-200">WaspWorld</span>
           </div>
           <div className="text-sm text-yellow-100/70">
