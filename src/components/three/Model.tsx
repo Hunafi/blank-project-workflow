@@ -1,7 +1,7 @@
 
 import { useRef, useEffect, useState, useCallback, memo } from "react";
-import { useThree } from "@react-three/fiber";
-import { useGLTF, TransformControls as DreiTransformControls } from "@react-three/drei";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useGLTF, TransformControls } from "@react-three/drei";
 import { useEditorStore } from "@/store/editorStore";
 import * as THREE from "three";
 import { toast } from "sonner";
@@ -75,7 +75,7 @@ const Model = memo(({
     transformRef.current.scale.set(scale.x, scale.y, scale.z);
   }, [position, rotation, scale]);
   
-  // Debounced update function with throttling to reduce update frequency
+  // Handle transform changes
   const onTransformChange = useCallback(() => {
     if (!transformRef.current || !selected) return;
     
@@ -133,14 +133,12 @@ const Model = memo(({
         {cloneRef.current && <primitive object={cloneRef.current} />}
       </mesh>
       
-      {selected && cloneRef.current && (
-        <DreiTransformControls
+      {selected && transformRef.current && (
+        <TransformControls
           object={transformRef}
           mode={transformMode}
           onObjectChange={onTransformChange}
           space="local"
-          makeDefault
-          enabled={true}
         />
       )}
     </>
