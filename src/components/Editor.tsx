@@ -1,6 +1,6 @@
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
-import { Save, Lock, Flower, Flower2, ArrowRight, Layers, LogOut, Eye } from "lucide-react";
+import { Save, Lock, Flower, Flower2, ArrowRight, Layers, LogOut } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useEditorStore } from "@/store/editorStore";
 import Scene3D from "@/components/Scene3D";
@@ -10,7 +10,6 @@ import Timeline from "@/components/Timeline";
 import AssetDropzone from "@/components/AssetDropzone";
 import ChangePasswordModal from "@/components/ChangePasswordModal";
 import CanvasOverlay from "@/components/CanvasOverlay";
-import AnimationPreview from "@/components/preview/AnimationPreview";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -22,7 +21,6 @@ const Editor = () => {
   const cameraKeyframes = useEditorStore(state => state.cameraKeyframes);
   const setPasswordDialogOpen = useEditorStore(state => state.setPasswordDialogOpen);
   const [showCanvas, setShowCanvas] = useState(true); // Set to true by default
-  const [showPreview, setShowPreview] = useState(false);
   
   const handleSaveScene = () => {
     // Prepare the scene data
@@ -81,14 +79,6 @@ const Editor = () => {
           <h1 className="text-xl font-semibold">WaspWorld 3D Editor</h1>
         </div>
         <div className="flex space-x-2 items-center">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setShowPreview(true)}
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            Preview
-          </Button>
           <Button 
             variant={showCanvas ? "default" : "outline"} 
             size="sm" 
@@ -206,11 +196,6 @@ const Editor = () => {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
-      
-      <AnimationPreview 
-        isOpen={showPreview} 
-        onClose={() => setShowPreview(false)} 
-      />
       
       <ChangePasswordModal />
     </div>
